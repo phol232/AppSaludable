@@ -37,7 +37,12 @@ class ApiService {
   }
 
   private getApiUrl(endpoint: string): string {
-    return `${this.baseURL}/api/${this.apiVersion}${endpoint}`;
+    const trimmedBase = this.baseURL.replace(/\/$/, '');
+    const hasApiSegment = /\/api$/i.test(trimmedBase);
+    const basePath = hasApiSegment ? trimmedBase : `${trimmedBase}/api`;
+    const versionSegment = this.apiVersion ? `/${this.apiVersion}` : '';
+
+    return `${basePath}${versionSegment}${endpoint}`;
   }
 
   private async makeRequest<T>(
