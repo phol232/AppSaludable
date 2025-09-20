@@ -78,6 +78,7 @@ export interface NinoCreate {
 export interface NinoUpdate {
   nin_nombres?: string;
   ent_id?: number;
+  nin_fecha_nac?: string;
 }
 
 export interface NinoResponse {
@@ -86,6 +87,12 @@ export interface NinoResponse {
   nin_fecha_nac: string;
   nin_sexo: string;
   ent_id?: number;
+  ent_nombre?: string | null;
+  ent_codigo?: string | null;
+  ent_direccion?: string | null;
+  ent_departamento?: string | null;
+  ent_provincia?: string | null;
+  ent_distrito?: string | null;
   edad_meses: number;
   creado_en: string;
   actualizado_en: string;
@@ -183,6 +190,7 @@ export interface ApiResponse<T = any> {
   message?: string;
   error?: string;
   detail?: string;
+  success?: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -206,10 +214,11 @@ export interface RolResponse {
 
 // Tipos para respuestas de API
 export interface ApiResponse<T = any> {
-  success: boolean;
+  success?: boolean;
   data?: T;
   message?: string;
   error?: string;
+  detail?: string;
 }
 
 // Contexto de usuario autenticado

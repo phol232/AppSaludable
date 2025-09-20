@@ -22,14 +22,22 @@ const CreateChildForm: React.FC<CreateChildFormProps> = ({ onSuccess, onCancel }
   });
 
   const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
+  const [allergySearchTerm, setAllergySearchTerm] = useState('');
   
   const { createChildProfile } = useChildProfileApi();
   const { getAllergyTypes, addAllergy } = useAllergiesApi();
 
-  // Cargar tipos de alergias al montar el componente
+  // Cargar tipos de alergias solo cuando el usuario escriba al menos 2 caracteres
   React.useEffect(() => {
-    getAllergyTypes.execute();
-  }, []);
+    const handler = setTimeout(() => {
+      const query = allergySearchTerm.trim();
+      if (query.length >= 2) {
+        getAllergyTypes.execute(query);
+      }
+    }, 300); // Aumenté el debounce a 300ms para mejor performance
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allergySearchTerm]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -251,29 +259,97 @@ const CreateChildForm: React.FC<CreateChildFormProps> = ({ onSuccess, onCancel }
           </div>
         </div>
 
-        {/* Alergias compactas */}
+        {/* Alergias mejoradas con buscador */}
         <div className="space-y-3">
           <h3 className="text-base md:text-lg font-bold text-gray-900">Alergias (Opcional)</h3>
-          
-          {getAllergyTypes.loading ? (
-            <p className="text-xs text-gray-500">Cargando...</p>
-          ) : getAllergyTypes.data && getAllergyTypes.data.length > 0 ? (
-            <div className="grid grid-cols-1 gap-2 max-h-28 overflow-y-auto border rounded p-2">
-              {getAllergyTypes.data.slice(0, 8).map((allergy) => (
-                <label key={allergy.ta_codigo} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedAllergies.includes(allergy.ta_codigo)}
-                    onChange={() => handleAllergyToggle(allergy.ta_codigo)}
-                    className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-400"
-                  />
-                  <span className="text-xs text-gray-700">
-                    {allergy.ta_nombre}
-                  </span>
-                </label>
-              ))}
+          <div className="space-y-3">
+            <div className="relative">
+              <input
+                type="text"
+                value={allergySearchTerm}
+                onChange={(event) => setAllergySearchTerm(event.target.value)}
+                placeholder="Buscar alergia por nombre o código..."
+                className="w-full rounded-lg border border-emerald-300 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 pl-10"
+              />
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-emerald-500">
+                🔍
+              </div>
             </div>
-          ) : null}
+            
+            {/* Solo mostrar resultados si hay término de búsqueda de al menos 2 caracteres */}
+            {allergySearchTerm.trim() && allergySearchTerm.trim().length >= 2 && (
+              <>
+                {getAllergyTypes.loading ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-500">🔍 Buscando alergias...</p>
+                  </div>
+                ) : getAllergyTypes.data && getAllergyTypes.data.length > 0 ? (
+                  <div className="border border-emerald-200 rounded-lg max-h-40 overflow-y-auto">
+                    <div className="space-y-1 p-2">
+                      {getAllergyTypes.data.map((allergy) => (
+                        <label 
+                          key={allergy.ta_codigo} 
+                          className="flex items-center space-x-3 p-2 hover:bg-emerald-50 rounded-md cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedAllergies.includes(allergy.ta_codigo)}
+                            onChange={() => handleAllergyToggle(allergy.ta_codigo)}
+                            className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-400 h-4 w-4"
+                          />
+                          <div className="flex-1">
+                            <span className="font-medium text-gray-800 text-sm">{allergy.ta_nombre}</span>
+                            <span className="ml-2 text-xs text-emerald-600 bg-emerald-100 px-2 py-1 rounded">
+                              {allergy.ta_codigo}
+                            </span>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <p className="text-sm text-gray-500">❌ No se encontraron alergias para "{allergySearchTerm}"</p>
+                  </div>
+                )}
+              </>
+            )}
+            
+            {/* Mostrar alergias seleccionadas */}
+            {selectedAllergies.length > 0 && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                <h4 className="text-sm font-semibold text-emerald-800 mb-2">Alergias seleccionadas:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedAllergies.map((allergyCode) => {
+                    const allergy = getAllergyTypes.data?.find(a => a.ta_codigo === allergyCode);
+                    return (
+                      <span 
+                        key={allergyCode}
+                        className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full"
+                      >
+                        {allergy?.ta_nombre || allergyCode}
+                        <button
+                          type="button"
+                          onClick={() => handleAllergyToggle(allergyCode)}
+                          className="ml-1 text-emerald-600 hover:text-emerald-800"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            
+            
+            {allergySearchTerm.trim() && allergySearchTerm.trim().length < 2 && (
+              <div className="text-center py-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+                <p className="text-sm text-gray-500">⌨️ Escribe al menos 2 caracteres para buscar</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Error */}
@@ -283,25 +359,33 @@ const CreateChildForm: React.FC<CreateChildFormProps> = ({ onSuccess, onCancel }
           </div>
         )}
 
-        {/* Botones */}
-        <div className="flex flex-wrap items-center justify-end gap-3 pt-5">
-          <button
-            type="submit"
-            disabled={createChildProfile.loading}
-            className="rounded-lg bg-emerald-400 px-6 py-3 text-sm md:text-base font-semibold text-emerald-900 shadow-lg transition-colors hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {createChildProfile.loading ? 'Guardando...' : 'Guardar'}
-          </button>
-          
+        {/* Botones mejorados */}
+        <div className="flex flex-wrap items-center justify-end gap-3 pt-6 border-t border-gray-200">
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-lg border border-emerald-300 bg-emerald-50 px-6 py-3 text-sm md:text-base font-semibold text-emerald-700 shadow-lg transition-colors hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+              className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm md:text-base font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
             >
               Cancelar
             </button>
           )}
+          <button
+            type="submit"
+            disabled={createChildProfile.loading}
+            className="rounded-lg bg-gradient-to-r from-emerald-400 to-emerald-500 px-6 py-3 text-sm md:text-base font-semibold text-white shadow-lg transition-all hover:from-emerald-500 hover:to-emerald-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"
+          >
+            {createChildProfile.loading ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin">⏳</span>
+                Guardando...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                💾 Guardar
+              </span>
+            )}
+          </button>
         </div>
       </form>
     </div>

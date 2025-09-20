@@ -100,7 +100,7 @@ export function useNinosApi() {
   const assignTutorFn = useMemo(() => apiService.assignTutorToChild.bind(apiService), []);
 
   const createNino = useApi<NinoResponse>(createNinoFn);
-  const getNinos = useApi<NinoResponse[]>(getNinosFn);
+  const getNinos = useApi<NinoWithAnthropometry[]>(getNinosFn);
   const getNino = useApi<NinoResponse>(getNinoFn);
   const updateNino = useApi<NinoResponse>(updateNinoFn);
   const deleteNino = useApi<{ message: string }>(deleteNinoFn);

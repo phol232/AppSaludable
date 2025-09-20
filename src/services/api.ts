@@ -144,8 +144,8 @@ class ApiService {
   }
 
   // Obtener todos los niños del usuario actual
-  async getNinos(): Promise<ApiResponse<NinoResponse[]>> {
-    return this.makeRequest<NinoResponse[]>(
+  async getNinos(): Promise<ApiResponse<NinoWithAnthropometry[]>> {
+    return this.makeRequest<NinoWithAnthropometry[]>(
       this.getApiUrl('/ninos/')
     );
   }
