@@ -29,6 +29,9 @@ const ChildrenList: React.FC = () => {
     ? getNinos.data
     : [];
   
+  // Extraer los datos del niño de la estructura correcta
+  const children = childProfiles.map((profile) => profile);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES');
   };
@@ -125,10 +128,7 @@ const ChildrenList: React.FC = () => {
                           {nino.nin_nombres.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 text-left">
-                          {/* NOMBRE MÁS GRANDE */}
                           <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight">{nino.nin_nombres}</h3>
-                          
-                          {/* Información del niño - tamaño normal */}
                           <div className="space-y-1">
                             <div className="text-sm">
                               <span className="font-bold text-gray-700">Edad:</span> 
@@ -191,6 +191,89 @@ const ChildrenList: React.FC = () => {
                       </button>
                     </div>
                   </div>
+                    <div
+                      className={`flex items-center justify-center w-12 h-12 rounded-full text-sm font-bold text-white ${
+                        nino.nin_sexo === 'M' ? 'bg-emerald-500' : 'bg-emerald-500'
+                      }`}
+                    >
+                      {nino.nin_nombres.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight">{nino.nin_nombres}</h3>
+                      <div className="space-y-1">
+                        <div className="text-sm">
+                          <span className="font-bold text-gray-700">Edad:</span> 
+                          <span className="text-gray-600 ml-1">{calculateAge(nino.nin_fecha_nac)}</span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="font-bold text-gray-700">Nacimiento:</span> 
+                          <span className="text-gray-600 ml-1">{formatDate(nino.nin_fecha_nac)}</span>
+                        </div>
+                        {ultimaAntropometria && (
+                          <div className="text-sm">
+                            <span className="font-bold text-gray-700">Último registro:</span> 
+                            <span className="text-gray-600 ml-1">
+                              {ultimaAntropometria.ant_peso_kg} kg • {ultimaAntropometria.ant_talla_cm} cm
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Estado nutricional - Solo si hay datos antropométricos */}
+                  {ultimaAntropometria && (
+                    <div className="mb-4">
+                      <div className="text-sm">
+                        <span className="font-bold text-gray-700">Última medición:</span>
+                        <span className="ml-1 text-gray-600">
+                          {formatDate(ultimaAntropometria.ant_fecha)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Fechas de seguimiento - Usando datos disponibles */}
+                  <div className="mb-4 pt-2 border-t border-gray-100">
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <div>
+                        <span className="font-bold">ID:</span> #{nino.nin_id}
+                      </div>
+                      {ultimaAntropometria && (
+                        <div>
+                          <span className="font-bold">Registrado:</span> {formatDate(ultimaAntropometria.ant_fecha)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Botones de acción */}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      className="rounded-lg bg-emerald-500 text-white px-3 py-2 text-sm font-semibold hover:bg-emerald-600 transition-all duration-200 transform hover:scale-105 shadow-sm"
+                      onClick={() => setSelectedChildId(nino.nin_id)}
+                    >
+                      📊 Análisis
+                    </button>
+                    <button
+                      className="rounded-lg bg-gray-800 text-white px-3 py-2 text-sm font-semibold hover:bg-gray-900 transition-all duration-200 transform hover:scale-105 shadow-sm"
+                      onClick={() => {/* TODO: abrir modal antropometría */}}
+                    >
+                      🖤 Medidas
+                    </button>
+                    <button
+                      className="rounded-lg bg-orange-500 text-white px-3 py-2 text-sm font-semibold hover:bg-orange-600 transition-all duration-200 transform hover:scale-105 shadow-sm"
+                      onClick={() => {/* TODO: abrir modal alergias */}}
+                    >
+                      🧡 Alergias
+                    </button>
+                    <button
+                      className="rounded-lg bg-blue-500 text-white px-3 py-2 text-sm font-semibold hover:bg-blue-600 transition-all duration-200 transform hover:scale-105 shadow-sm"
+                      onClick={() => {/* TODO: abrir modal entidades */}}
+                    >
+                      � Entidad
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -210,7 +293,6 @@ const ChildrenList: React.FC = () => {
           </ul>
         </div>
       )}
-
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="w-full sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[65vw] max-w-[1000px] my-16 p-0 max-h-[85vh] overflow-y-auto rounded-2xl">
           <DialogHeader className="p-4 pb-2">

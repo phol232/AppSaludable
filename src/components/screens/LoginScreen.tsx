@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, User, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { motion } from 'motion/react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -18,8 +17,7 @@ export function LoginScreen({ onLogin, onSignUp }: LoginScreenProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
-  const { login, loginWithGoogle, isLoading } = useAuth();
-  const { signInWithGoogle } = useGoogleSignIn();
+  const { login, beginGoogleLogin, isLoading, googleAuthError, clearGoogleAuthError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,23 +40,17 @@ export function LoginScreen({ onLogin, onSignUp }: LoginScreenProps) {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      setError('');
-      const idToken = await signInWithGoogle();
-      const result = await loginWithGoogle(idToken);
-      
-      if (result.success) {
-        onLogin();
-      } else {
-        setError(result.error || 'Error al iniciar sesión con Google');
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al conectar con Google';
-      setError(message);
-      console.error('Google sign-in error:', error);
-    }
+  const handleGoogleLogin = () => {
+    setError('');
+    beginGoogleLogin();
   };
+
+  useEffect(() => {
+    if (googleAuthError) {
+      setError(googleAuthError);
+      clearGoogleAuthError();
+    }
+  }, [googleAuthError, clearGoogleAuthError]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/10 via-accent/5 to-primary/10 flex">

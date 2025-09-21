@@ -124,6 +124,13 @@ class ApiService {
     );
   }
 
+  getGoogleAuthStartUrl(redirectTo: string): string {
+    const baseUrl = this.getApiUrl('/auth/google/start');
+    const url = new URL(baseUrl);
+    url.searchParams.set('redirect_to', redirectTo);
+    return url.toString();
+  }
+
   // Métodos utilitarios para el token
   setToken(token: string): void {
     localStorage.setItem('auth_token', token);

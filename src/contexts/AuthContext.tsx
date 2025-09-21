@@ -1,15 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthUser, UserLogin, GoogleLogin, UserRegister, UserResponse } from '../types/api';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { AuthUser, UserLogin, UserRegister, UserResponse } from '../types/api';
 import { apiService } from '../services/api';
 
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
   login: (userData: UserLogin) => Promise<{ success: boolean; error?: string }>;
-  loginWithGoogle: (idToken: string) => Promise<{ success: boolean; error?: string }>;
+  beginGoogleLogin: (redirectTo?: string) => void;
   register: (userData: UserRegister, roleCode: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isAuthenticated: boolean;
+  googleAuthError: string | null;
+  clearGoogleAuthError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,6 +31,34 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [googleAuthError, setGoogleAuthError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    const tokenFromUrl = url.searchParams.get('google_token');
+    const tokenTypeParam = url.searchParams.get('token_type');
+    const errorFromUrl = url.searchParams.get('google_error');
+
+    if (errorFromUrl) {
+      setGoogleAuthError(errorFromUrl);
+    }
+
+    if (tokenFromUrl) {
+      apiService.setToken(tokenFromUrl);
+    }
+
+    if (tokenFromUrl || tokenTypeParam || errorFromUrl) {
+      url.searchParams.delete('google_token');
+      url.searchParams.delete('token_type');
+      url.searchParams.delete('google_error');
+      const cleanedPath = `${url.pathname}${url.search}${url.hash}`;
+      window.history.replaceState({}, document.title, cleanedPath);
+    }
+  }, []);
 
   // Verificar token y obtener el perfil real del usuario al cargar
   useEffect(() => {
@@ -114,43 +144,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async (idToken: string): Promise<{ success: boolean; error?: string }> => {
-    setIsLoading(true);
-    try {
-      const response = await apiService.loginWithGoogle({ id_token: idToken });
-      
-      if (response.success && response.data) {
-        const token = response.data.access_token;
-        apiService.setToken(token);
-        
-        // Obtener el perfil real inmediatamente después del login
-        const me = await apiService.getProfile();
-        if (me.success && me.data) {
-          const u = me.data as unknown as UserResponse;
-          setUser({
-            usr_id: u.usr_id,
-            usr_usuario: u.usr_usuario,
-            usr_correo: u.usr_correo,
-            usr_nombre: u.usr_nombre,
-            usr_apellido: u.usr_apellido,
-            rol_id: u.rol_id,
-            avatar_url: u.avatar_url,
-            token,
-          });
-        }
-        
-        return { success: true };
-      } else {
-        return { success: false, error: response.error || 'Error en el login con Google' };
-      }
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Error desconocido en Google login' 
-      };
-    } finally {
-      setIsLoading(false);
-    }
+  const beginGoogleLogin = (redirectOverride?: string) => {
+    setGoogleAuthError(null);
+    const target = redirectOverride 
+      || import.meta.env.VITE_GOOGLE_POST_LOGIN_REDIRECT 
+      || window.location.origin;
+    const authorizationUrl = apiService.getGoogleAuthStartUrl(target);
+    window.location.href = authorizationUrl;
   };
 
   const register = async (userData: UserRegister, roleCode: string): Promise<{ success: boolean; error?: string }> => {
@@ -240,14 +240,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const clearGoogleAuthError = useCallback(() => {
+    setGoogleAuthError(null);
+  }, []);
+
   const value: AuthContextType = {
     user,
     isLoading,
     login,
-    loginWithGoogle,
+    beginGoogleLogin,
     register,
     logout,
     isAuthenticated: !!user,
+    googleAuthError,
+    clearGoogleAuthError,
   };
 
   return (
