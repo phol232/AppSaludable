@@ -91,7 +91,7 @@ export function RegisterScreen({ onRegister, onBackToLogin }: RegisterScreenProp
 
   const handleGoogleLogin = () => {
     setError('');
-    beginGoogleLogin();
+    beginGoogleLogin(window.location.origin);
   };
 
   useEffect(() => {
