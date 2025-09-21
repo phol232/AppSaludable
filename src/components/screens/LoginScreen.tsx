@@ -5,6 +5,7 @@ import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { motion } from 'motion/react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -17,7 +18,8 @@ export function LoginScreen({ onLogin, onSignUp }: LoginScreenProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
-  const { login, isLoading } = useAuth();
+  const { login, loginWithGoogle, isLoading } = useAuth();
+  const { signInWithGoogle } = useGoogleSignIn();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +39,23 @@ export function LoginScreen({ onLogin, onSignUp }: LoginScreenProps) {
       onLogin();
     } else {
       setError(result.error || 'Error al iniciar sesión');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setError('');
+      const idToken = await signInWithGoogle();
+      const result = await loginWithGoogle(idToken);
+      
+      if (result.success) {
+        onLogin();
+      } else {
+        setError(result.error || 'Error al iniciar sesión con Google');
+      }
+    } catch (error) {
+      setError('Error al conectar con Google');
+      console.error('Google sign-in error:', error);
     }
   };
 
@@ -149,6 +168,8 @@ export function LoginScreen({ onLogin, onSignUp }: LoginScreenProps) {
                 variant="outline" 
                 className="w-full h-12 border-border hover:bg-muted"
                 type="button"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
               >
                 <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

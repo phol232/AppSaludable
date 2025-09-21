@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthUser, UserLogin, UserRegister, UserResponse } from '../types/api';
+import { AuthUser, UserLogin, GoogleLogin, UserRegister, UserResponse } from '../types/api';
 import { apiService } from '../services/api';
 
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
   login: (userData: UserLogin) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: (idToken: string) => Promise<{ success: boolean; error?: string }>;
   register: (userData: UserRegister, roleCode: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -113,6 +114,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (idToken: string): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true);
+    try {
+      const response = await apiService.loginWithGoogle({ id_token: idToken });
+      
+      if (response.success && response.data) {
+        const token = response.data.access_token;
+        apiService.setToken(token);
+        
+        // Obtener el perfil real inmediatamente después del login
+        const me = await apiService.getProfile();
+        if (me.success && me.data) {
+          const u = me.data as unknown as UserResponse;
+          setUser({
+            usr_id: u.usr_id,
+            usr_usuario: u.usr_usuario,
+            usr_correo: u.usr_correo,
+            usr_nombre: u.usr_nombre,
+            usr_apellido: u.usr_apellido,
+            rol_id: u.rol_id,
+            avatar_url: u.avatar_url,
+            token,
+          });
+        }
+        
+        return { success: true };
+      } else {
+        return { success: false, error: response.error || 'Error en el login con Google' };
+      }
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Error desconocido en Google login' 
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async (userData: UserRegister, roleCode: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     try {
@@ -204,6 +244,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     isLoading,
     login,
+    loginWithGoogle,
     register,
     logout,
     isAuthenticated: !!user,

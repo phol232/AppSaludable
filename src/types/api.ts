@@ -4,6 +4,11 @@ export interface UserLogin {
   contrasena: string;
 }
 
+export interface GoogleLogin {
+  id_token: string;
+  access_token?: string;
+}
+
 export interface UserRegister {
   nombres: string;
   apellidos: string;

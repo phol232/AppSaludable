@@ -2,6 +2,7 @@
 
 import { 
   UserLogin, 
+  GoogleLogin,
   UserRegister, 
   UserProfile,
   UserRegisterResponse,
@@ -109,6 +110,16 @@ class ApiService {
       this.getApiUrl('/auth/logout'),
       {
         method: 'POST',
+      }
+    );
+  }
+
+  async loginWithGoogle(googleData: GoogleLogin): Promise<ApiResponse<Token>> {
+    return this.makeRequest<Token>(
+      this.getApiUrl('/auth/google'),
+      {
+        method: 'POST',
+        body: JSON.stringify(googleData),
       }
     );
   }
@@ -362,36 +373,65 @@ class ApiService {
       const [ninoResponse, antropometriasResponse, alergiasResponse] = await Promise.all([
         this.getNino(ninoId),
         this.getAnthropometryHistory(ninoId),
-        this.getAllergies(ninoId)
+        this.getAllergies(ninoId),
       ]);
 
       if (!ninoResponse.data) {
         throw new Error('Error obteniendo información del niño');
       }
 
-      // Intentar obtener la última evaluación nutricional
+      const rawNinoData: any = ninoResponse.data;
+
+      let nino: NinoResponse;
+      let antropometrias: AnthropometryResponse[] = Array.isArray(antropometriasResponse?.data)
+        ? antropometriasResponse.data
+        : [];
+      let alergias: AlergiaResponse[] = Array.isArray(alergiasResponse?.data)
+        ? alergiasResponse.data
+        : [];
       let ultimoEstadoNutricional: NutritionalStatusResponse | undefined;
-      try {
-        const evaluacionResponse = await this.evaluateNutritionalStatus(ninoId);
-        ultimoEstadoNutricional = evaluacionResponse.data;
-      } catch (error) {
-        // Si no hay datos suficientes para evaluar, continuamos sin la evaluación
-        console.warn('No se pudo obtener evaluación nutricional:', error);
+
+      if (rawNinoData && typeof rawNinoData === 'object' && 'nino' in rawNinoData) {
+        nino = rawNinoData.nino as NinoResponse;
+
+        if (!antropometrias.length && Array.isArray(rawNinoData.antropometrias)) {
+          antropometrias = rawNinoData.antropometrias;
+        }
+
+        if (!alergias.length && Array.isArray(rawNinoData.alergias)) {
+          alergias = rawNinoData.alergias;
+        }
+
+        if (rawNinoData.ultimo_estado_nutricional) {
+          ultimoEstadoNutricional = rawNinoData.ultimo_estado_nutricional as NutritionalStatusResponse;
+        }
+      } else {
+        nino = rawNinoData as NinoResponse;
+      }
+
+      if (!ultimoEstadoNutricional) {
+        try {
+          const evaluacionResponse = await this.evaluateNutritionalStatus(ninoId);
+          ultimoEstadoNutricional = evaluacionResponse.data;
+        } catch (error) {
+          // Si no hay datos suficientes para evaluar, continuamos sin la evaluación
+          console.warn('No se pudo obtener evaluación nutricional:', error);
+        }
       }
 
       return {
         success: true,
         data: {
-          nino: ninoResponse.data,
-          antropometrias: antropometriasResponse.data || [],
-          alergias: alergiasResponse.data || [],
-          ultimo_estado_nutricional: ultimoEstadoNutricional
-        }
+          nino,
+          antropometrias,
+          alergias,
+          ultimo_estado_nutricional: ultimoEstadoNutricional,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Error obteniendo datos del niño'
+        error: error instanceof Error ? error.message : 'Error obteniendo datos del niño',
       };
     }
   }
