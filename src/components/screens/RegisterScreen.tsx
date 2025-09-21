@@ -103,7 +103,8 @@ export function RegisterScreen({ onRegister, onBackToLogin }: RegisterScreenProp
         setError(result.error || 'Error al registrarse con Google');
       }
     } catch (error) {
-      setError('Error al conectar con Google');
+      const message = error instanceof Error ? error.message : 'Error al conectar con Google';
+      setError(message);
       console.error('Google sign-in error:', error);
     }
   };

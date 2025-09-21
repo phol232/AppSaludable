@@ -54,7 +54,8 @@ export function LoginScreen({ onLogin, onSignUp }: LoginScreenProps) {
         setError(result.error || 'Error al iniciar sesión con Google');
       }
     } catch (error) {
-      setError('Error al conectar con Google');
+      const message = error instanceof Error ? error.message : 'Error al conectar con Google';
+      setError(message);
       console.error('Google sign-in error:', error);
     }
   };
