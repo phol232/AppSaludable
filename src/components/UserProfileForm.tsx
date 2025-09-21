@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUserApi } from '../hooks/useApi';
+import { useAuth } from '../contexts/AuthContext';
 import type { UserProfile, UserResponse } from '../types/api';
 
 interface Props {
@@ -21,6 +22,7 @@ const UserProfileForm: React.FC<Props> = ({ onSaved }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const { getProfile, updateProfile } = useUserApi();
+  const { user } = useAuth();
 
   useEffect(() => {
     getProfile.execute();
@@ -32,7 +34,7 @@ const UserProfileForm: React.FC<Props> = ({ onSaved }) => {
         dni: getProfile.data.dni || '',
         nombres: getProfile.data.usr_nombre || '',
         apellidos: getProfile.data.usr_apellido || '',
-        avatar_url: getProfile.data.avatar_url || '',
+        avatar_url: getProfile.data.avatar_url || user?.avatar_url || '',
         telefono: getProfile.data.telefono || '',
         direccion: getProfile.data.direccion || '',
         genero: getProfile.data.genero,
@@ -40,7 +42,7 @@ const UserProfileForm: React.FC<Props> = ({ onSaved }) => {
         idioma: getProfile.data.idioma || 'es',
       });
     }
-  }, [getProfile.data]);
+  }, [getProfile.data, user?.avatar_url]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
