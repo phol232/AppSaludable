@@ -14,8 +14,6 @@ interface RegisterScreenProps {
 
 export function RegisterScreen({ onRegister, onBackToLogin }: RegisterScreenProps) {
   const ROLE_OPTIONS = [
-    { code: 'ADMIN', label: 'Administrador', registerName: 'Administrador', description: 'Gestiona usuarios y configuraciones del sistema.' },
-    { code: 'NUTRI', label: 'Nutricionista', registerName: 'Nutricionista', description: 'Coordina planes nutricionales y seguimiento clínico.' },
     { code: 'TUTOR', label: 'Tutor', registerName: 'Tutor', description: 'Responsable de menores y acompañamiento diario.' },
     { code: 'USR', label: 'Usuario', registerName: 'Usuario', description: 'Acceso personal sin responsabilidades adicionales.' },
     { code: 'PADRES', label: 'Padres', registerName: 'PADRES', description: 'Padres o madres que registran a sus hijos.' },
