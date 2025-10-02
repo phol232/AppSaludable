@@ -29,6 +29,8 @@ import {
   DialogHeader,
   DialogTitle
 } from './ui/dialog';
+import ConfirmationModal from './ui/ConfirmationModal';
+import ActionConfirmModal from './ui/ActionConfirmModal';
 
 interface ClinicalSection {
   id: 'anthropometry' | 'allergies-entities';
@@ -108,6 +110,29 @@ export default function SelfAnthropometry() {
     birthDate: string;
   } | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Estados para modales de confirmación
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error';
+    title: string;
+    message?: string;
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  });
+
+  const [deleteAllergyModal, setDeleteAllergyModal] = useState<{
+    isOpen: boolean;
+    allergyId: number | null;
+    allergyName: string;
+  }>({
+    isOpen: false,
+    allergyId: null,
+    allergyName: '',
+  });
 
   const fetchChildDetail = getChildWithData.execute;
   const fetchAllergyCatalog = getAllergyTypes.execute;
@@ -248,11 +273,26 @@ export default function SelfAnthropometry() {
     setIsCreateChildModalOpen(false);
   };
 
-  const handleOpenChildModal = (modal: ChildModalType, childId: number) => {
+  const handleOpenChildModal = async (modal: ChildModalType, childId: number) => {
     if (selectedChildId !== childId) {
       handleSelectChild(childId);
     }
     setActiveChildModal(modal);
+    
+    // Si es el modal de medidas, pre-llenar con las últimas mediciones
+    if (modal === 'measure') {
+      // Cargar datos del niño si no están ya cargados
+      const childData = await fetchChildDetail(childId);
+      
+      if (childData?.antropometrias && childData.antropometrias.length > 0) {
+        const latestMeasurement = childData.antropometrias[0];
+        setMeasurementForm({
+          ant_peso_kg: String(latestMeasurement.ant_peso_kg),
+          ant_talla_cm: String(latestMeasurement.ant_talla_cm),
+          ant_fecha: new Date().toISOString().split('T')[0], // Fecha actual para el nuevo registro
+        });
+      }
+    }
   };
 
   const handleCloseChildModal = () => {
@@ -347,6 +387,7 @@ export default function SelfAnthropometry() {
     if (!selectedChildId) {
       return;
     }
+    
     setRemovingAllergyId(allergyId);
     try {
       await removeAllergy.execute(selectedChildId, allergyId);
@@ -624,10 +665,10 @@ export default function SelfAnthropometry() {
                   </div>
                   {nutritionalStatus.recommendations?.length ? (
                     <div className="pt-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Recomendaciones</p>
-                      <ul className="mt-2 list-disc space-y-1 pl-4 text-sm">
-                        {nutritionalStatus.recommendations.map((item) => (
-                          <li key={item}>{item}</li>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Recomendaciones</p>
+                      <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 list-disc pl-4 text-sm">
+                        {nutritionalStatus.recommendations.map((item, index) => (
+                          <li key={`${item}-${index}`} className="break-words">{item}</li>
                         ))}
                       </ul>
                     </div>

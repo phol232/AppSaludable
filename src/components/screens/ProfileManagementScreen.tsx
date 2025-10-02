@@ -1,11 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import UserProfileForm from '../UserProfileForm';
-import { ChildrenList } from '../children';
 import { useUserApi } from '../../hooks/useApi';
-import { useNinosApi } from '../../hooks/useApi';
 
 interface ProfileSection {
-  id: 'personal' | 'children' | 'anthropometry';
+  id: 'personal';
   title: string;
   icon: string;
   description: string;
@@ -13,24 +11,9 @@ interface ProfileSection {
 
 export function ProfileManagementScreen() {
   const [activeSection, setActiveSection] = useState<ProfileSection['id']>('personal');
-  const { getProfile } = useUserApi();
-  const { getNinos } = useNinosApi();
-
-  useEffect(() => {
-    if (!getProfile.data) getProfile.execute();
-    getNinos.execute();
-  }, []);
-
-  const ageYears = useMemo(() => {
-    const dob = getProfile.data?.fecha_nac;
-    if (!dob) return null;
-    return Math.floor((Date.now() - new Date(dob).getTime()) / (1000 * 60 * 60 * 24 * 365.25));
-  }, [getProfile.data?.fecha_nac]);
-
-  const isSelfManaged = typeof ageYears === 'number' ? ageYears >= 13 : null;
 
   const sections: ProfileSection[] = useMemo(() => {
-    const base: ProfileSection[] = [
+    return [
       {
         id: 'personal',
         title: 'Información Personal',
@@ -38,47 +21,14 @@ export function ProfileManagementScreen() {
         description: 'Gestiona tu información personal y configuración de cuenta',
       },
     ];
-    if (Array.isArray(getNinos.data) && getNinos.data.length > 0) {
-      base.push({
-        id: 'children',
-        title: 'Mis Niños',
-        icon: '👶',
-        description: 'Gestiona los perfiles de tus niños y sus datos antropométricos',
-      });
-    }
-    // Removido: pestaña de "Datos Clínicos" ya que está disponible en el sidebar
-    return base;
-  }, [getNinos.data]);  // Reajustar sección activa si cambia el conjunto de pestañas
-  useEffect(() => {
-    if (!sections.find(s => s.id === activeSection)) {
-      setActiveSection('personal');
-    }
-  }, [sections, activeSection]);
+  }, []);
 
   const handleSaved = () => {
-    // reconsultar para recalcular edad/autogestión y pestañas
-    getProfile.execute();
+    // Perfil guardado correctamente
   };
 
   const renderSectionContent = () => {
-    switch (activeSection) {
-      case 'personal':
-        return <UserProfileForm onSaved={handleSaved} />;
-      case 'children':
-        return (
-          <div className="bg-white rounded-lg shadow-md">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">Gestión de Niños</h2>
-              <p className="text-gray-600 mt-1">Administra los perfiles de tus niños y sus datos antropométricos</p>
-            </div>
-            <div className="p-6">
-              <ChildrenList />
-            </div>
-          </div>
-        );
-      default:
-        return <UserProfileForm onSaved={handleSaved} />;
-    }
+    return <UserProfileForm onSaved={handleSaved} />;
   };
 
   return (

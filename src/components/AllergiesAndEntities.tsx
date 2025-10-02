@@ -128,6 +128,22 @@ export default function AllergiesAndEntities() {
       setEntityQuery('');
       setEntityResults([]);
       
+      // Refrescar datos del niño
+      const refreshedChild = await getSelfChild.execute();
+      if (refreshedChild) {
+        // Actualizar entidad actual con los datos frescos
+        if (refreshedChild.ent_nombre) {
+          setCurrentEntity({
+            ent_id: refreshedChild.ent_id || 0,
+            ent_nombre: refreshedChild.ent_nombre,
+            ent_codigo: refreshedChild.ent_codigo || '',
+            ent_distrito: refreshedChild.ent_distrito || '',
+            ent_provincia: refreshedChild.ent_provincia || '',
+            ent_departamento: refreshedChild.ent_departamento || '',
+          });
+        }
+      }
+      
       // Mostrar mensaje de éxito
       alert('Entidad asociada correctamente');
     } else {

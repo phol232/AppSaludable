@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ConfirmationModal from './ui/ConfirmationModal';
 import { useUserApi } from '../hooks/useApi';
 import { useAuth } from '../contexts/AuthContext';
 import type { UserProfile, UserResponse } from '../types/api';
@@ -23,6 +24,13 @@ const UserProfileForm: React.FC<Props> = ({ onSaved }) => {
   const [localError, setLocalError] = useState<string | null>(null);
   const { getProfile, updateProfile } = useUserApi();
   const { user } = useAuth();
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error';
+    title: string;
+    message?: string;
+  }>({ isOpen: false, type: 'success', title: '', message: '' });
 
   useEffect(() => {
     getProfile.execute();
@@ -70,13 +78,25 @@ const UserProfileForm: React.FC<Props> = ({ onSaved }) => {
     }
 
     const result = await updateProfile.execute(payload);
-    if (result) {
-      setIsEditing(false);
-      alert('Perfil actualizado correctamente');
-      onSaved?.(result);
-      window.dispatchEvent(new CustomEvent('profile:updated'));
-      getProfile.execute();
+    if (!result) {
+      setConfirmModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Error al actualizar',
+        message: String(updateProfile.error || 'No se pudo actualizar el perfil.'),
+      });
+      return;
     }
+    setIsEditing(false);
+    onSaved?.(result);
+    window.dispatchEvent(new CustomEvent('profile:updated'));
+    getProfile.execute();
+    setConfirmModal({
+      isOpen: true,
+      type: 'success',
+      title: 'Perfil actualizado',
+      message: 'Tu información se guardó correctamente.',
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -277,6 +297,15 @@ const UserProfileForm: React.FC<Props> = ({ onSaved }) => {
           Este perfil está administrado por un tutor. Algunas opciones de edición pueden estar limitadas.
         </div>
       )}
+
+      {/* Modal de confirmación (éxito/error) */}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, type: 'success', title: '', message: '' })}
+        type={confirmModal.type}
+        title={confirmModal.title}
+        message={confirmModal.message}
+      />
     </div>
   );
 };
