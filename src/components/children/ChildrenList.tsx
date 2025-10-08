@@ -120,7 +120,7 @@ const ChildrenList: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
-  
+
   // Estados para modales de confirmación
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -143,7 +143,7 @@ const ChildrenList: React.FC = () => {
     childId: null,
     childName: '',
   });
-  
+
   const { getNinos, deleteNino, updateNino } = useNinosApi();
 
   useEffect(() => {
@@ -156,8 +156,15 @@ const ChildrenList: React.FC = () => {
   const handleChildCreated = (childId: number) => {
     setIsCreateModalOpen(false);
     setSelectedChildId(childId);
+
+    // ✅ FORZAR RECARGA SIN CACHÉ
     getNinos.execute();
-    
+
+    // ✅ RECARGAR DE NUEVO DESPUÉS DE 500ms por si acaso
+    setTimeout(() => {
+      getNinos.execute();
+    }, 500);
+
     // Mostrar modal de confirmación después de cerrar el modal de creación
     setTimeout(() => {
       setConfirmModal({
@@ -193,7 +200,7 @@ const ChildrenList: React.FC = () => {
     if (!childId) return;
 
     const deleted = await deleteNino.execute(childId);
-    
+
     setDeleteConfirmModal({ isOpen: false, childId: null, childName: '' });
 
     if (!deleted) {
@@ -210,7 +217,7 @@ const ChildrenList: React.FC = () => {
       setSelectedChildId(null);
     }
     await getNinos.execute();
-    
+
     setConfirmModal({
       isOpen: true,
       type: 'success',
@@ -240,7 +247,7 @@ const ChildrenList: React.FC = () => {
 
     const originalName = childProfiles.find(c => c.nino.nin_id === editingChild.id)?.nino.nin_nombres;
     const originalBirthDate = childProfiles.find(c => c.nino.nin_id === editingChild.id)?.nino.nin_fecha_nac?.split('T')[0];
-    
+
     const nameChanged = trimmedName !== originalName;
     const dateChanged = editingChild.birthDate !== originalBirthDate;
 
@@ -269,11 +276,11 @@ const ChildrenList: React.FC = () => {
     setEditingChild(null);
     setEditError(null);
     await getNinos.execute();
-    
+
     // Mensaje personalizado según lo que cambió
     let title = 'Datos actualizados';
     let message = 'La información del niño ha sido actualizada correctamente.';
-    
+
     if (nameChanged && dateChanged) {
       title = 'Nombre y fecha actualizados';
       message = 'El nombre y la fecha de nacimiento han sido actualizados correctamente.';
@@ -284,7 +291,7 @@ const ChildrenList: React.FC = () => {
       title = 'Fecha actualizada';
       message = 'La fecha de nacimiento ha sido actualizada correctamente.';
     }
-    
+
     setConfirmModal({
       isOpen: true,
       type: 'success',
@@ -317,7 +324,7 @@ const ChildrenList: React.FC = () => {
     const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.44));
     const years = Math.floor(diffMonths / 12);
     const months = diffMonths % 12;
-    
+
     if (years > 0) {
       return `${years} año${years > 1 ? 's' : ''}${months > 0 ? ` y ${months} mes${months > 1 ? 'es' : ''}` : ''}`;
     } else {
@@ -328,7 +335,7 @@ const ChildrenList: React.FC = () => {
   // Si se está mostrando el perfil de un niño específico
   if (selectedChildId) {
     return (
-      <ChildProfileView 
+      <ChildProfileView
         childId={selectedChildId}
         onClose={() => {
           setSelectedChildId(null);
