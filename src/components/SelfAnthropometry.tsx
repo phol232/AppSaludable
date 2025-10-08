@@ -666,11 +666,17 @@ export default function SelfAnthropometry() {
                   {nutritionalStatus.recommendations?.length ? (
                     <div className="pt-2">
                       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Recomendaciones</p>
-                      <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 list-disc pl-4 text-sm">
-                        {nutritionalStatus.recommendations.map((item, index) => (
-                          <li key={`${item}-${index}`} className="break-words">{item}</li>
+                      <div className="mt-2 space-y-3">
+                        {nutritionalStatus.recommendations.map((rec, index) => (
+                          <div key={index} className="flex gap-2">
+                            <span className="text-lg flex-shrink-0">{rec.icono}</span>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm text-slate-900">{rec.titulo}</p>
+                              <p className="text-xs text-slate-600 mt-0.5">{rec.descripcion}</p>
+                            </div>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   ) : null}
                 </div>

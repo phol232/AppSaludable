@@ -164,12 +164,16 @@ const ChildProfileView: React.FC<ChildProfileViewProps> = ({ childId, onClose })
       {ultimo_estado_nutricional && ultimo_estado_nutricional.recommendations.length > 0 && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-2">Recomendaciones</h3>
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 list-disc list-inside">
-              {ultimo_estado_nutricional.recommendations.map((rec, index) => (
-                <li key={index} className="text-blue-800 break-words">{rec}</li>
-              ))}
-            </ul>
+          <div className="bg-blue-50 p-4 rounded-lg space-y-3">
+            {ultimo_estado_nutricional.recommendations.map((rec, index) => (
+              <div key={index} className="flex gap-3">
+                <span className="text-2xl flex-shrink-0">{rec.icono}</span>
+                <div className="flex-1">
+                  <p className="font-medium text-blue-900">{rec.titulo}</p>
+                  <p className="text-sm text-blue-700 mt-1">{rec.descripcion}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

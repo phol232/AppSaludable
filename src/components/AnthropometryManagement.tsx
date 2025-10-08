@@ -224,10 +224,18 @@ export default function AnthropometryManagement() {
               
               {status.recommendations && status.recommendations.length > 0 && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="text-sm font-medium text-blue-900 mb-2">Recomendaciones:</div>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 list-disc list-inside text-sm text-blue-800">
-                    {status.recommendations.map((r, i) => (<li key={i} className="break-words">{r}</li>))}
-                  </ul>
+                  <div className="text-sm font-medium text-blue-900 mb-3">Recomendaciones:</div>
+                  <div className="space-y-3">
+                    {status.recommendations.map((rec, i) => (
+                      <div key={i} className="flex gap-2">
+                        <span className="text-lg flex-shrink-0">{rec.icono}</span>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-blue-900">{rec.titulo}</p>
+                          <p className="text-xs text-blue-700 mt-0.5">{rec.descripcion}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
