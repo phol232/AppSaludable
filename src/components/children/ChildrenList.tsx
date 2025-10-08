@@ -7,7 +7,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import ConfirmationModal from '../ui/ConfirmationModal';
 import ActionConfirmModal from '../ui/ActionConfirmModal';
 
-type ClassificationKey = 'normal' | 'sobrepeso' | 'obesidad' | 'desnutrición' | 'desnutricion' | 'bajo peso' | 'sin_datos';
+// 7 Categorías OMS
+type ClassificationKey =
+  | 'DESNUTRICION_SEVERA'
+  | 'DESNUTRICION_MODERADA'
+  | 'RIESGO_DESNUTRICION'
+  | 'NORMAL'
+  | 'RIESGO_SOBREPESO'
+  | 'SOBREPESO'
+  | 'OBESIDAD'
+  | 'sin_datos';
 
 interface ClassificationTheme {
   badgeBg: string;
@@ -15,50 +24,65 @@ interface ClassificationTheme {
   cardBg: string;
   cardBorder: string;
   avatarBg: string;
+  displayName: string;
 }
 
 const CLASSIFICATION_THEMES: Record<ClassificationKey, ClassificationTheme> = {
-  normal: {
+  DESNUTRICION_SEVERA: {
+    badgeBg: 'bg-red-100',
+    badgeText: 'text-red-800',
+    cardBg: 'bg-white',
+    cardBorder: 'border-red-300',
+    avatarBg: 'bg-red-600',
+    displayName: 'Desnutrición Severa',
+  },
+  DESNUTRICION_MODERADA: {
+    badgeBg: 'bg-orange-100',
+    badgeText: 'text-orange-800',
+    cardBg: 'bg-white',
+    cardBorder: 'border-orange-300',
+    avatarBg: 'bg-orange-600',
+    displayName: 'Desnutrición Moderada',
+  },
+  RIESGO_DESNUTRICION: {
+    badgeBg: 'bg-yellow-100',
+    badgeText: 'text-yellow-800',
+    cardBg: 'bg-white',
+    cardBorder: 'border-yellow-300',
+    avatarBg: 'bg-yellow-600',
+    displayName: 'Riesgo de Desnutrición',
+  },
+  NORMAL: {
     badgeBg: 'bg-emerald-100',
-    badgeText: 'text-emerald-700',
+    badgeText: 'text-emerald-800',
     cardBg: 'bg-emerald-50',
     cardBorder: 'border-emerald-200',
     avatarBg: 'bg-emerald-500',
+    displayName: 'Normal',
   },
-  sobrepeso: {
+  RIESGO_SOBREPESO: {
     badgeBg: 'bg-amber-100',
-    badgeText: 'text-amber-700',
+    badgeText: 'text-amber-800',
     cardBg: 'bg-white',
-    cardBorder: 'border-amber-200',
-    avatarBg: 'bg-amber-500',
+    cardBorder: 'border-amber-300',
+    avatarBg: 'bg-amber-600',
+    displayName: 'Riesgo de Sobrepeso',
   },
-  obesidad: {
-    badgeBg: 'bg-rose-100',
-    badgeText: 'text-rose-700',
-    cardBg: 'bg-white',
-    cardBorder: 'border-rose-200',
-    avatarBg: 'bg-rose-500',
-  },
-  desnutrición: {
+  SOBREPESO: {
     badgeBg: 'bg-orange-100',
-    badgeText: 'text-orange-700',
+    badgeText: 'text-orange-800',
     cardBg: 'bg-white',
-    cardBorder: 'border-orange-200',
-    avatarBg: 'bg-orange-500',
+    cardBorder: 'border-orange-300',
+    avatarBg: 'bg-orange-600',
+    displayName: 'Sobrepeso',
   },
-  desnutricion: {
-    badgeBg: 'bg-orange-100',
-    badgeText: 'text-orange-700',
+  OBESIDAD: {
+    badgeBg: 'bg-purple-100',
+    badgeText: 'text-purple-800',
     cardBg: 'bg-white',
-    cardBorder: 'border-orange-200',
-    avatarBg: 'bg-orange-500',
-  },
-  'bajo peso': {
-    badgeBg: 'bg-sky-100',
-    badgeText: 'text-sky-700',
-    cardBg: 'bg-white',
-    cardBorder: 'border-sky-200',
-    avatarBg: 'bg-sky-500',
+    cardBorder: 'border-purple-300',
+    avatarBg: 'bg-purple-600',
+    displayName: 'Obesidad',
   },
   sin_datos: {
     badgeBg: 'bg-slate-100',
@@ -66,6 +90,7 @@ const CLASSIFICATION_THEMES: Record<ClassificationKey, ClassificationTheme> = {
     cardBg: 'bg-white',
     cardBorder: 'border-slate-200',
     avatarBg: 'bg-emerald-500',
+    displayName: 'Sin Evaluación',
   },
 };
 
@@ -74,23 +99,30 @@ const normalizeClassificationKey = (classification?: string): ClassificationKey 
     return 'sin_datos';
   }
 
-  const normalized = classification.trim().toLowerCase();
+  const normalized = classification.trim().toUpperCase();
 
+  // Mapeo directo de las 7 categorías OMS
   if (normalized in CLASSIFICATION_THEMES) {
     return normalized as ClassificationKey;
   }
 
+  // Compatibilidad con nombres alternativos
   switch (normalized) {
-    case 'bajo_peso':
-    case 'bajo-peso':
-    case 'bajo peso':
-      return 'bajo peso';
-    case 'desnutricion':
-      return 'desnutricion';
-    case 'desnutrición':
-      return 'desnutrición';
-    case 'sobre peso':
-      return 'sobrepeso';
+    case 'DESNUTRICION SEVERA':
+    case 'DESNUTRICIÓN SEVERA':
+    case 'SEVERO':
+      return 'DESNUTRICION_SEVERA';
+    case 'DESNUTRICION MODERADA':
+    case 'DESNUTRICIÓN MODERADA':
+    case 'MODERADO':
+      return 'DESNUTRICION_MODERADA';
+    case 'RIESGO DESNUTRICION':
+    case 'RIESGO DESNUTRICIÓN':
+    case 'RIESGO':
+      return 'RIESGO_DESNUTRICION';
+    case 'RIESGO SOBREPESO':
+    case 'RIESGO DE SOBREPESO':
+      return 'RIESGO_SOBREPESO';
     default:
       return 'sin_datos';
   }
@@ -113,7 +145,11 @@ const getInitials = (fullName: string): string => {
 const formatClassification = (status?: NutritionalStatusResponse | null) => {
   const classification = status?.classification;
   if (!classification) return 'SIN EVALUACIÓN';
-  return classification.toUpperCase();
+
+  const key = normalizeClassificationKey(classification);
+  const theme = CLASSIFICATION_THEMES[key];
+
+  return theme.displayName.toUpperCase();
 };
 
 const ChildrenList: React.FC = () => {
