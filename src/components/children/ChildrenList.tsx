@@ -4,8 +4,7 @@ import CreateChildForm from './CreateChildForm';
 import ChildProfileView from './ChildProfileView';
 import type { NinoWithAnthropometry, NutritionalStatusResponse } from '../../types/api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import ConfirmationModal from '../ui/ConfirmationModal';
-import ActionConfirmModal from '../ui/ActionConfirmModal';
+import { toast } from 'sonner';
 
 // 7 Categorías OMS
 type ClassificationKey =
@@ -157,29 +156,6 @@ const ChildrenList: React.FC = () => {
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Estados para modales de confirmación
-  const [confirmModal, setConfirmModal] = useState<{
-    isOpen: boolean;
-    type: 'success' | 'error';
-    title: string;
-    message?: string;
-  }>({
-    isOpen: false,
-    type: 'success',
-    title: '',
-    message: '',
-  });
-
-  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
-    isOpen: boolean;
-    childId: number | null;
-    childName: string;
-  }>({
-    isOpen: false,
-    childId: null,
-    childName: '',
-  });
-
   const { getNinos, deleteNino, updateNino } = useNinosApi();
 
   useEffect(() => {
@@ -200,16 +176,6 @@ const ChildrenList: React.FC = () => {
     setTimeout(() => {
       getNinos.execute();
     }, 500);
-
-    // Mostrar modal de confirmación después de cerrar el modal de creación
-    setTimeout(() => {
-      setConfirmModal({
-        isOpen: true,
-        type: 'success',
-        title: 'Niño registrado',
-        message: '¡Perfil del niño creado exitosamente! Se ha realizado la evaluación nutricional.',
-      });
-    }, 300);
   };
 
   const [editingChild, setEditingChild] = useState<{
@@ -223,28 +189,16 @@ const ChildrenList: React.FC = () => {
     ? getNinos.data
     : [];
 
-  const handleDeleteChild = (childId: number, childName: string) => {
-    setDeleteConfirmModal({
-      isOpen: true,
-      childId,
-      childName,
-    });
-  };
+  const handleDeleteChild = async (childId: number, childName: string) => {
+    const confirmed = window.confirm(`¿Estás seguro de que deseas eliminar a "${childName}" y todos sus datos asociados? Esta acción no se puede deshacer.`);
 
-  const confirmDeleteChild = async () => {
-    const { childId, childName } = deleteConfirmModal;
-    if (!childId) return;
+    if (!confirmed) return;
 
     const deleted = await deleteNino.execute(childId);
 
-    setDeleteConfirmModal({ isOpen: false, childId: null, childName: '' });
-
     if (!deleted) {
-      setConfirmModal({
-        isOpen: true,
-        type: 'error',
-        title: 'Error al eliminar',
-        message: deleteNino.error || 'No se pudo eliminar al niño.',
+      toast.error('Error al eliminar', {
+        description: deleteNino.error || 'No se pudo eliminar al niño.',
       });
       return;
     }
@@ -254,11 +208,8 @@ const ChildrenList: React.FC = () => {
     }
     await getNinos.execute();
 
-    setConfirmModal({
-      isOpen: true,
-      type: 'success',
-      title: 'Niño eliminado',
-      message: `${childName} ha sido eliminado correctamente.`,
+    toast.success('Niño eliminado', {
+      description: `${childName} ha sido eliminado correctamente.`,
     });
   };
 
@@ -300,11 +251,8 @@ const ChildrenList: React.FC = () => {
     if (!result) {
       setEditingChild(null);
       setEditError(null);
-      setConfirmModal({
-        isOpen: true,
-        type: 'error',
-        title: 'Error al actualizar',
-        message: updateNino.error || 'No se pudo actualizar la información.',
+      toast.error('Error al actualizar', {
+        description: updateNino.error || 'No se pudo actualizar la información.',
       });
       return;
     }
@@ -315,25 +263,20 @@ const ChildrenList: React.FC = () => {
 
     // Mensaje personalizado según lo que cambió
     let title = 'Datos actualizados';
-    let message = 'La información del niño ha sido actualizada correctamente.';
+    let description = 'La información del niño ha sido actualizada correctamente.';
 
     if (nameChanged && dateChanged) {
       title = 'Nombre y fecha actualizados';
-      message = 'El nombre y la fecha de nacimiento han sido actualizados correctamente.';
+      description = 'El nombre y la fecha de nacimiento han sido actualizados correctamente.';
     } else if (nameChanged) {
       title = 'Nombre actualizado';
-      message = 'El nombre del niño ha sido actualizado correctamente.';
+      description = 'El nombre del niño ha sido actualizado correctamente.';
     } else if (dateChanged) {
       title = 'Fecha actualizada';
-      message = 'La fecha de nacimiento ha sido actualizada correctamente.';
+      description = 'La fecha de nacimiento ha sido actualizada correctamente.';
     }
 
-    setConfirmModal({
-      isOpen: true,
-      type: 'success',
-      title,
-      message,
-    });
+    toast.success(title, { description });
   };
 
   const formatDate = (dateString?: string | null) => {
@@ -497,9 +440,9 @@ const ChildrenList: React.FC = () => {
                             type="button"
                             className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
                             style={{ backgroundColor: '#dc2626' }}
-                            onClick={(event) => {
+                            onClick={async (event) => {
                               event.stopPropagation();
-                              handleDeleteChild(nino.nin_id, nino.nin_nombres);
+                              await handleDeleteChild(nino.nin_id, nino.nin_nombres);
                             }}
                             aria-label={`Eliminar ${nino.nin_nombres}`}
                           >
@@ -708,26 +651,6 @@ const ChildrenList: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Modal de confirmación de eliminación */}
-      <ActionConfirmModal
-        isOpen={deleteConfirmModal.isOpen}
-        onClose={() => setDeleteConfirmModal({ isOpen: false, childId: null, childName: '' })}
-        onConfirm={confirmDeleteChild}
-        title="¿Eliminar niño?"
-        description={`¿Estás seguro de que deseas eliminar a "${deleteConfirmModal.childName}" y todos sus datos asociados? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
-        isLoading={deleteNino.loading}
-      />
-
-      {/* Modal de confirmación de acciones */}
-      <ConfirmationModal
-        isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal({ isOpen: false, type: 'success', title: '', message: '' })}
-        type={confirmModal.type}
-        title={confirmModal.title}
-        message={confirmModal.message}
-      />
     </div>
   );
 };
