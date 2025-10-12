@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
 
-import { 
-  UserLogin, 
+import {
+  UserLogin,
   GoogleLogin,
-  UserRegister, 
+  UserRegister,
   UserProfile,
   UserRegisterResponse,
-  Token, 
+  Token,
   UserResponse,
   NinoCreate,
   NinoUpdate,
@@ -31,10 +31,12 @@ import {
 class ApiService {
   private baseURL: string;
   private apiVersion: string;
+  private tokenKey: string;
 
   constructor() {
     this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
     this.apiVersion = import.meta.env.VITE_API_VERSION || 'v1';
+    this.tokenKey = import.meta.env.VITE_TOKEN_KEY || 'auth_token';
   }
 
   private getApiUrl(endpoint: string): string {
@@ -51,8 +53,8 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
-      const token = localStorage.getItem(import.meta.env.VITE_TOKEN_KEY || 'auth_token');
-      
+      const token = localStorage.getItem(this.tokenKey);
+
       const config: RequestInit = {
         headers: {
           'Content-Type': 'application/json',
@@ -63,19 +65,19 @@ class ApiService {
       };
 
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         // Si el token expiró o es inválido (401), disparar evento de logout
         if (response.status === 401) {
           this.handleUnauthorized();
         }
-        
+
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         data,
@@ -98,10 +100,10 @@ class ApiService {
       } catch (e) {
         console.warn('Error limpiando localStorage:', e);
       }
-      
+
       // Disparar evento personalizado para que AuthContext lo maneje
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
-      
+
       // Redirigir al login después de un pequeño delay
       setTimeout(() => {
         window.location.href = '/login';
@@ -139,34 +141,41 @@ class ApiService {
     );
   }
 
-  async loginWithGoogle(googleData: GoogleLogin): Promise<ApiResponse<Token>> {
-    return this.makeRequest<Token>(
-      this.getApiUrl('/auth/google'),
+  async deleteAccount(): Promise<ApiResponse<{ detail: string }>> {
+    return this.makeRequest<{ detail: string }>(
+      this.getApiUrl('/usuarios/me'),
       {
-        method: 'POST',
-        body: JSON.stringify(googleData),
+        method: 'DELETE',
       }
     );
   }
 
-  getGoogleAuthStartUrl(redirectTo: string): string {
-    const baseUrl = this.getApiUrl('/auth/google/start');
-    const url = new URL(baseUrl);
-    url.searchParams.set('redirect_to', redirectTo);
-    return url.toString();
+  async loginWithFirebase(idToken: string): Promise<ApiResponse<Token>> {
+    if (!idToken) {
+      return { success: false, error: 'id_token faltante en la solicitud' };
+    }
+
+    return this.makeRequest<Token>(this.getApiUrl('/auth/google'), {
+      method: 'POST',
+      body: JSON.stringify({ id_token: idToken }),
+    });
+  }
+
+  async loginWithGoogle(googleData: GoogleLogin): Promise<ApiResponse<Token>> {
+    return this.loginWithFirebase(googleData?.id_token || '');
   }
 
   // Métodos utilitarios para el token
   setToken(token: string): void {
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem(this.tokenKey, token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem(this.tokenKey);
   }
 
   removeToken(): void {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem(this.tokenKey);
   }
 
   isAuthenticated(): boolean {
