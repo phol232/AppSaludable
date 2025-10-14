@@ -25,7 +25,9 @@ import {
   PaginatedResponse,
   UserRoleChangeRequest,
   UserRoleChangeResponse,
-  AssignTutorRequest
+  AssignTutorRequest,
+  ChatBotRequest,
+  ChatBotResponse
 } from '../types/api';
 
 class ApiService {
@@ -516,6 +518,25 @@ class ApiService {
     return this.makeRequest<NutritionalStatusResponse>(
       this.getApiUrl(`/children/${ninId}/nutritional-status`)
     );
+  }
+
+  // Chatbot y recomendaciones nutricionales
+  async getChatBotRecommendation(
+    idNino: number,
+    tipoComida: string,
+    preguntaUsuario?: string
+  ): Promise<ApiResponse<import('../types/api').ChatBotResponse>> {
+    const mlBaseUrl = import.meta.env.VITE_ML_API_BASE_URL || 'http://localhost:8003';
+    const url = `${mlBaseUrl}/ml/recomendacion_personalizada`;
+    
+    return this.makeRequest<import('../types/api').ChatBotResponse>(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        id_nino: idNino,
+        tipo_comida: tipoComida,
+        pregunta_usuario: preguntaUsuario,
+      }),
+    });
   }
 }
 

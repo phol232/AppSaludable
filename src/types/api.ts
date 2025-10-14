@@ -243,3 +243,56 @@ export interface AuthUser {
   avatar_url?: string;
   token: string;
 }
+
+// Tipos para chatbot y recomendaciones nutricionales
+export interface ChatBotRequest {
+  id_nino: number;
+  tipo_comida: string; // "DESAYUNO" | "ALMUERZO" | "CENA"
+  pregunta_usuario?: string;
+}
+
+export interface RecetaRecomendada {
+  id: number;
+  nombre: string;
+  calorias: number;
+  proteinas: number;
+  carbohidratos: number;
+  grasas: number;
+  fibra: number;
+  hierro: number;
+  costo: number;
+  puntuacion: number;
+}
+
+export interface EstadoNutricional {
+  diagnostico: string;
+  estado_actual: string;
+  imc: number | null;
+  peso_kg: number | null;
+  talla_cm: number | null;
+  edad_meses: number | null;
+  sexo: string | null;
+}
+
+export interface DatosNino {
+  id: number;
+  nombre: string;
+  fecha_nacimiento: string | null;
+  sexo: string;
+  peso_kg: number | null;
+  talla_cm: number | null;
+  imc: number | null;
+  edad_meses: number | null;
+  estado_nutricional: string;
+  diagnostico: string;
+  entidad: string;
+  codigo_entidad: string;
+}
+
+export interface ChatBotResponse {
+  recomendacion: string;
+  datos_nino: DatosNino;
+  recetas_disponibles: RecetaRecomendada[];
+  estado_nutricional: EstadoNutricional;
+  used_llm: boolean;
+}

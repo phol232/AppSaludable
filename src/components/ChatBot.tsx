@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Paperclip, Bot, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -6,6 +6,8 @@ import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
 import { motion, AnimatePresence } from 'motion/react';
+import { apiService } from '../services/api';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -28,14 +30,26 @@ export function ChatBot({ className = '' }: ChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: '¡Hola! Soy tu asistente nutricional de NutriFamily 🍎 ¿En qué puedo ayudarte hoy?',
+      text: '¡Hola! Soy tu asistente nutricional de NutriFamily 🍎 ¿En qué puedo ayudarte hoy? Puedo recomendarte recetas para desayuno, almuerzo o cena según las necesidades nutricionales de tu hijo/a.',
       sender: 'bot',
       timestamp: new Date(),
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [currentChildId, setCurrentChildId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Obtener el ID del niño actual
+  useEffect(() => {
+    const fetchCurrentChild = async () => {
+      const response = await apiService.getSelfChild();
+      if (response.success && response.data) {
+        setCurrentChildId(response.data.nin_id);
+      }
+    };
+    fetchCurrentChild();
+  }, []);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -43,6 +57,11 @@ export function ChatBot({ className = '' }: ChatBotProps) {
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
+
+    if (!currentChildId) {
+      toast.error("No se pudo obtener el perfil del niño. Por favor, intenta nuevamente.");
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -52,21 +71,67 @@ export function ChatBot({ className = '' }: ChatBotProps) {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const userQuestion = inputMessage;
     setInputMessage('');
     setIsTyping(true);
 
-    // Simular respuesta del bot
-    setTimeout(() => {
-      const botResponse = generateBotResponse(inputMessage);
+    try {
+      // Detectar tipo de comida en el mensaje
+      const tipoComida = detectarTipoComida(userQuestion);
+      
+      // Llamar al servicio de recomendaciones
+      const response = await apiService.getChatBotRecommendation(
+        currentChildId,
+        tipoComida,
+        userQuestion
+      );
+
+      if (response.success && response.data) {
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: response.data.recomendacion,
+          sender: 'bot',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        // Fallback a respuesta simulada si falla el servicio
+        const botResponse = generateBotResponse(userQuestion);
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: botResponse,
+          sender: 'bot',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, botMessage]);
+      }
+    } catch (error) {
+      console.error('Error al obtener recomendación:', error);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: botResponse,
+        text: 'Lo siento, hubo un problema al procesar tu consulta. Por favor, intenta nuevamente.',
         sender: 'bot',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
+  };
+
+  const detectarTipoComida = (mensaje: string): string => {
+    const mensajeLower = mensaje.toLowerCase();
+    if (mensajeLower.includes('desayuno') || mensajeLower.includes('mañana')) {
+      return 'DESAYUNO';
+    }
+    if (mensajeLower.includes('almuerzo') || mensajeLower.includes('comida') || mensajeLower.includes('mediodía')) {
+      return 'ALMUERZO';
+    }
+    if (mensajeLower.includes('cena') || mensajeLower.includes('noche')) {
+      return 'CENA';
+    }
+    // Por defecto, usar DESAYUNO
+    return 'DESAYUNO';
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -345,23 +410,23 @@ export function ChatBot({ className = '' }: ChatBotProps) {
                   <Badge
                     variant="outline"
                     className="cursor-pointer hover:bg-green-50 text-xs"
-                    onClick={() => setInputMessage('¿Qué recetas recomiendas para hoy?')}
+                    onClick={() => setInputMessage('¿Qué me recomiendas para el desayuno?')}
                   >
-                    🍽️ Recetas del día
+                    🌅 Desayuno
                   </Badge>
                   <Badge
                     variant="outline"
                     className="cursor-pointer hover:bg-green-50 text-xs"
-                    onClick={() => setInputMessage('¿Cómo va el progreso nutricional?')}
+                    onClick={() => setInputMessage('¿Qué me recomiendas para el almuerzo?')}
                   >
-                    📊 Progreso
+                    🍽️ Almuerzo
                   </Badge>
                   <Badge
                     variant="outline"
                     className="cursor-pointer hover:bg-green-50 text-xs"
-                    onClick={() => setInputMessage('Tengo dudas sobre alergias')}
+                    onClick={() => setInputMessage('¿Qué me recomiendas para la cena?')}
                   >
-                    🚫 Alergias
+                    🌙 Cena
                   </Badge>
                 </div>
               </div>
