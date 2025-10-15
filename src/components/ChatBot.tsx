@@ -30,26 +30,14 @@ export function ChatBot({ className = '' }: ChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: '¡Hola! Soy tu asistente nutricional de NutriFamily 🍎 ¿En qué puedo ayudarte hoy? Puedo recomendarte recetas para desayuno, almuerzo o cena según las necesidades nutricionales de tu hijo/a.',
+      text: '¡Hola! Soy tu asistente nutricional de NutriFamily 🍎\n\nPuedo recomendarte recetas personalizadas para tus hijos. Solo escribe algo como:\n\n"¿Qué le puedo dar a Juan para el desayuno?"\n"Recomiéndame algo para María en el almuerzo"\n\n¿En qué puedo ayudarte hoy?',
       sender: 'bot',
       timestamp: new Date(),
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [currentChildId, setCurrentChildId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Obtener el ID del niño actual
-  useEffect(() => {
-    const fetchCurrentChild = async () => {
-      const response = await apiService.getSelfChild();
-      if (response.success && response.data) {
-        setCurrentChildId(response.data.nin_id);
-      }
-    };
-    fetchCurrentChild();
-  }, []);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -57,11 +45,6 @@ export function ChatBot({ className = '' }: ChatBotProps) {
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
-
-    if (!currentChildId) {
-      toast.error("No se pudo obtener el perfil del niño. Por favor, intenta nuevamente.");
-      return;
-    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -76,40 +59,49 @@ export function ChatBot({ className = '' }: ChatBotProps) {
     setIsTyping(true);
 
     try {
-      // Detectar tipo de comida en el mensaje
-      const tipoComida = detectarTipoComida(userQuestion);
+      // Extraer nombre del niño del mensaje
+      const nombreNino = extraerNombreNino(userQuestion);
       
-      // Llamar al servicio de recomendaciones
-      const response = await apiService.getChatBotRecommendation(
-        currentChildId,
-        tipoComida,
-        userQuestion
-      );
+      if (nombreNino) {
+        // Detectar tipo de comida en el mensaje
+        const tipoComida = detectarTipoComida(userQuestion);
 
-      if (response.success && response.data) {
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: response.data.recomendacion,
-          sender: 'bot',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, botMessage]);
-      } else {
-        // Fallback a respuesta simulada si falla el servicio
-        const botResponse = generateBotResponse(userQuestion);
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: botResponse,
-          sender: 'bot',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, botMessage]);
+        // Llamar al servicio de recomendaciones con el nombre
+        const response = await apiService.getChatBotRecommendation(
+          nombreNino,
+          tipoComida,
+          userQuestion
+        );
+
+        if (response.success && response.data) {
+          const botMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            text: response.data.recomendacion,
+            sender: 'bot',
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, botMessage]);
+          setIsTyping(false);
+          return;
+        }
       }
-    } catch (error) {
-      console.error('Error al obtener recomendación:', error);
+
+      // Fallback: usar respuesta simulada (modo general)
+      const botResponse = generateBotResponse(userQuestion);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Lo siento, hubo un problema al procesar tu consulta. Por favor, intenta nuevamente.',
+        text: botResponse,
+        sender: 'bot',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error al obtener recomendación:', error);
+      // En caso de error, usar respuesta simulada
+      const botResponse = generateBotResponse(userQuestion);
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: botResponse,
         sender: 'bot',
         timestamp: new Date(),
       };
@@ -132,6 +124,28 @@ export function ChatBot({ className = '' }: ChatBotProps) {
     }
     // Por defecto, usar DESAYUNO
     return 'DESAYUNO';
+  };
+
+  const extraerNombreNino = (mensaje: string): string | null => {
+    // Patrones comunes para extraer nombres
+    const patrones = [
+      /para\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i,  // "para Juan"
+      /de\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i,    // "de María"
+      /a\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i,     // "a Pedro"
+      /mi\s+hijo\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i,  // "mi hijo Carlos"
+      /mi\s+hija\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i,  // "mi hija Ana"
+      /niño\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i,  // "niño Luis"
+      /niña\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)/i,  // "niña Sofia"
+    ];
+
+    for (const patron of patrones) {
+      const match = mensaje.match(patron);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+
+    return null;
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,11 +250,10 @@ export function ChatBot({ className = '' }: ChatBotProps) {
         <Button
           onClick={toggleChat}
           size="lg"
-          className={`h-14 w-14 rounded-full shadow-lg transition-all duration-300 ${
-            isOpen
-              ? 'bg-red-500 hover:bg-red-600'
-              : 'bg-green-600 hover:bg-green-700'
-          }`}
+          className={`h-14 w-14 rounded-full shadow-lg transition-all duration-300 ${isOpen
+            ? 'bg-red-500 hover:bg-red-600'
+            : 'bg-green-600 hover:bg-green-700'
+            }`}
         >
           <AnimatePresence mode="wait">
             {isOpen ? (
@@ -306,16 +319,14 @@ export function ChatBot({ className = '' }: ChatBotProps) {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${
-                        message.sender === 'user' ? 'justify-end' : 'justify-start'
-                      }`}
+                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'
+                        }`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-lg p-3 ${
-                          message.sender === 'user'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
+                        className={`max-w-[85%] rounded-lg p-3 ${message.sender === 'user'
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-100 text-gray-800'
+                          }`}
                       >
                         {message.file && (
                           <div className="mb-2 p-2 bg-white/20 rounded text-xs">
@@ -330,9 +341,8 @@ export function ChatBot({ className = '' }: ChatBotProps) {
                         )}
                         <p className="text-sm">{message.text}</p>
                         <p
-                          className={`text-xs mt-1 opacity-75 ${
-                            message.sender === 'user' ? 'text-right' : 'text-left'
-                          }`}
+                          className={`text-xs mt-1 opacity-75 ${message.sender === 'user' ? 'text-right' : 'text-left'
+                            }`}
                         >
                           {formatTime(message.timestamp)}
                         </p>

@@ -47,6 +47,29 @@ export interface UserRoleChangeResponse {
   msg: string;
 }
 
+// Tipos para administración
+export interface UsuarioAdmin {
+  usr_id: number;
+  usr_usuario: string;
+  usr_nombres: string;
+  usr_apellidos: string;
+  usr_correo: string;
+  usr_dni: string | null;
+  rol_nombre: string;
+  usr_activo: boolean;
+  creado_en: string;
+}
+
+export interface ResetPasswordRequest {
+  usr_id: number;
+  nueva_contrasena: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+  usr_usuario: string;
+}
+
 export interface Token {
   access_token: string;
   token_type: string;
@@ -59,6 +82,7 @@ export interface UserResponse {
   usr_nombre: string;
   usr_apellido: string;
   rol_id: number;
+  rol_nombre?: string;
   usr_activo: boolean;
   password_hash?: string;
   // Campos adicionales del perfil
@@ -240,13 +264,14 @@ export interface AuthUser {
   usr_nombre: string;
   usr_apellido: string;
   rol_id: number;
+  rol_nombre?: string;
   avatar_url?: string;
   token: string;
 }
 
 // Tipos para chatbot y recomendaciones nutricionales
 export interface ChatBotRequest {
-  id_nino: number;
+  nombre_nino: string;
   tipo_comida: string; // "DESAYUNO" | "ALMUERZO" | "CENA"
   pregunta_usuario?: string;
 }
