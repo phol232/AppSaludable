@@ -39,12 +39,13 @@ class ApiService {
   private tokenKey: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    // TEMPORAL: Hardcodear HTTPS para debug
+    this.baseURL = 'https://nutricion-backend-343042748851.europe-west1.run.app';
     this.apiVersion = import.meta.env.VITE_API_VERSION || 'v1';
     this.tokenKey = import.meta.env.VITE_TOKEN_KEY || 'auth_token';
-    
+
     // Debug: verificar qué URL se está usando
-    console.log('🔍 API Base URL:', this.baseURL);
+    console.log('🔍 API Base URL (HARDCODED):', this.baseURL);
     console.log('🔍 Environment variables:', {
       VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
       NODE_ENV: import.meta.env.NODE_ENV,
