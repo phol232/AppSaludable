@@ -42,6 +42,14 @@ class ApiService {
     this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
     this.apiVersion = import.meta.env.VITE_API_VERSION || 'v1';
     this.tokenKey = import.meta.env.VITE_TOKEN_KEY || 'auth_token';
+    
+    // Debug: verificar qué URL se está usando
+    console.log('🔍 API Base URL:', this.baseURL);
+    console.log('🔍 Environment variables:', {
+      VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+      NODE_ENV: import.meta.env.NODE_ENV,
+      MODE: import.meta.env.MODE
+    });
   }
 
   private getApiUrl(endpoint: string): string {

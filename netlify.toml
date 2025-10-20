@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm run build -- --mode production"
   publish = "build"
 
 [build.environment]
