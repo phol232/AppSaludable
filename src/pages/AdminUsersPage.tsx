@@ -190,24 +190,22 @@ export const AdminUsersPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        usuario.rol_nombre === 'Administrador'
-                          ? 'bg-red-100 text-red-800'
-                          : usuario.rol_nombre === 'Nutricionista'
+                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${usuario.rol_nombre === 'Administrador'
+                        ? 'bg-red-100 text-red-800'
+                        : usuario.rol_nombre === 'Nutricionista'
                           ? 'bg-blue-100 text-blue-800'
                           : 'bg-green-100 text-green-800'
-                      }`}
+                        }`}
                     >
                       {usuario.rol_nombre}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        usuario.usr_activo
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
+                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${usuario.usr_activo
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                        }`}
                     >
                       {usuario.usr_activo ? 'Activo' : 'Inactivo'}
                     </span>
@@ -223,11 +221,10 @@ export const AdminUsersPage: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleToggleActive(usuario)}
-                      className={`inline-flex items-center gap-1 ${
-                        usuario.usr_activo
-                          ? 'text-red-600 hover:text-red-900'
-                          : 'text-green-600 hover:text-green-900'
-                      }`}
+                      className={`inline-flex items-center gap-1 ${usuario.usr_activo
+                        ? 'text-red-600 hover:text-red-900'
+                        : 'text-green-600 hover:text-green-900'
+                        }`}
                       title={usuario.usr_activo ? 'Desactivar' : 'Activar'}
                     >
                       {usuario.usr_activo ? (

@@ -32,9 +32,9 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
 
   const [allergyTypes, setAllergyTypes] = useState<TipoAlergiaResponse[]>([]);
   const [allergies, setAllergies] = useState<AlergiaResponse[]>([]);
-  const [newAllergy, setNewAllergy] = useState<{ ta_codigo: string; severidad: 'LEVE'|'MODERADA'|'SEVERA' }>({ 
-    ta_codigo: '', 
-    severidad: 'LEVE' 
+  const [newAllergy, setNewAllergy] = useState<{ ta_codigo: string; severidad: 'LEVE'|'MODERADA'|'SEVERA' }>({
+    ta_codigo: '',
+    severidad: 'LEVE'
   });
   const [allergyQuery, setAllergyQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -114,7 +114,7 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
             Alergias de {ninNombre}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {loading ? (
             <div className="flex justify-center items-center py-8">
@@ -164,9 +164,9 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
                       <select
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                         value={newAllergy.severidad}
-                        onChange={(e) => setNewAllergy(prev => ({ 
-                          ...prev, 
-                          severidad: e.target.value as any 
+                        onChange={(e) => setNewAllergy(prev => ({
+                          ...prev,
+                          severidad: e.target.value as any
                         }))}
                       >
                         <option value="LEVE">Leve</option>

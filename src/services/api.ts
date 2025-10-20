@@ -535,7 +535,7 @@ class ApiService {
   ): Promise<ApiResponse<import('../types/api').ChatBotResponse>> {
     const mlBaseUrl = import.meta.env.VITE_ML_API_BASE_URL || 'http://localhost:8003';
     const url = `${mlBaseUrl}/ml/recomendacion_personalizada`;
-    
+
     return this.makeRequest<import('../types/api').ChatBotResponse>(url, {
       method: 'POST',
       body: JSON.stringify({

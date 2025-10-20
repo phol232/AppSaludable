@@ -59,11 +59,11 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
 
   const cargarPlan = async () => {
     if (!menId) return;
-    
+
     setCargando(true);
     try {
       const data = await obtenerDetalleMenu(menId);
-      
+
       // Transformar los datos: items[] -> desayuno, almuerzo, cena
       if (data.dias && Array.isArray(data.dias)) {
         data.dias = data.dias.map((dia: any) => {
@@ -144,7 +144,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
       const resultado = await generarPlanCompletoConLLM(ninId, fechaInicio);
 
       setProgreso((prev) => [...prev, '✅ Plan generado exitosamente']);
-      
+
       // Recargar el plan
       if (resultado.men_id) {
         const data = await obtenerDetalleMenu(resultado.men_id);
@@ -221,7 +221,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                 </span>
               </div>
               <h4 className="text-lg font-bold text-gray-800 mb-2">{comida.rec_nombre}</h4>
-              
+
               {/* Info nutricional */}
               <div className="flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-1">
@@ -529,7 +529,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
             <DialogHeader>
               <DialogTitle className="text-xl">{recetaDetalle.rec_nombre}</DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               {/* Info nutricional completa */}
               <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-200">
@@ -616,7 +616,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
               )}
 
               <div className="flex justify-end pt-4 border-t">
-                <Button 
+                <Button
                   onClick={() => setRecetaDetalle(null)}
                   className="bg-green-600 hover:bg-green-700"
                 >

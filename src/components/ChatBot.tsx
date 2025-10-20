@@ -61,7 +61,7 @@ export function ChatBot({ className = '' }: ChatBotProps) {
     try {
       // Extraer nombre del niño del mensaje
       const nombreNino = extraerNombreNino(userQuestion);
-      
+
       if (nombreNino) {
         // Detectar tipo de comida en el mensaje
         const tipoComida = detectarTipoComida(userQuestion);
