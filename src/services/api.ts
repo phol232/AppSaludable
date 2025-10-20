@@ -217,7 +217,7 @@ class ApiService {
   // Crear un nuevo niño
   async createNino(ninoData: NinoCreate): Promise<ApiResponse<NinoResponse>> {
     return this.makeRequest<NinoResponse>(
-      this.getApiUrl('/ninos'),
+      this.getApiUrl('/ninos/'),
       {
         method: 'POST',
         body: JSON.stringify(ninoData),
