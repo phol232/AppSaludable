@@ -58,8 +58,20 @@ class ApiService {
     const hasApiSegment = /\/api$/i.test(trimmedBase);
     const basePath = hasApiSegment ? trimmedBase : `${trimmedBase}/api`;
     const versionSegment = this.apiVersion ? `/${this.apiVersion}` : '';
+    const finalUrl = `${basePath}${versionSegment}${endpoint}`;
 
-    return `${basePath}${versionSegment}${endpoint}`;
+    // Debug: verificar construcción de URL
+    console.log('🔍 getApiUrl DEBUG:', {
+      endpoint,
+      baseURL: this.baseURL,
+      trimmedBase,
+      hasApiSegment,
+      basePath,
+      versionSegment,
+      finalUrl
+    });
+
+    return finalUrl;
   }
 
   private async makeRequest<T>(
