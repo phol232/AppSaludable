@@ -21,7 +21,7 @@ import {
 
 interface ComidasFavoritasModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (recargar?: boolean) => void;
   ninId: number;
   ninNombre: string;
 }
@@ -54,10 +54,12 @@ export const ComidasFavoritasModal: React.FC<ComidasFavoritasModalProps> = ({
   const [recetasEncontradas, setRecetasEncontradas] = useState<Receta[]>([]);
   const [buscando, setBuscando] = useState(false);
   const [agregando, setAgregando] = useState(false);
+  const [cambiosRealizados, setCambiosRealizados] = useState(false);
 
   useEffect(() => {
     if (open) {
       cargarFavoritas();
+      setCambiosRealizados(false);
     }
   }, [open, ninId]);
 
@@ -109,6 +111,7 @@ export const ComidasFavoritasModal: React.FC<ComidasFavoritasModalProps> = ({
       });
       setBusqueda('');
       setRecetasEncontradas([]);
+      setCambiosRealizados(true);
       await cargarFavoritas();
     } catch (error) {
       toast({
@@ -128,6 +131,7 @@ export const ComidasFavoritasModal: React.FC<ComidasFavoritasModalProps> = ({
         title: 'Favorita eliminada',
         description: `Se eliminó "${recNombre}"`,
       });
+      setCambiosRealizados(true);
       await cargarFavoritas();
     } catch (error) {
       toast({
@@ -142,8 +146,12 @@ export const ComidasFavoritasModal: React.FC<ComidasFavoritasModalProps> = ({
     return favoritas.some((f) => f.rec_id === recId);
   };
 
+  const handleClose = () => {
+    onClose(cambiosRealizados);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -257,7 +265,7 @@ export const ComidasFavoritasModal: React.FC<ComidasFavoritasModalProps> = ({
 
             {/* Botón cerrar */}
             <div className="flex justify-end pt-4 border-t">
-              <Button onClick={onClose} variant="outline">
+              <Button onClick={handleClose} variant="outline">
                 Cerrar
               </Button>
             </div>

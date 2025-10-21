@@ -17,7 +17,7 @@ import { Loader2, AlertTriangle } from 'lucide-react';
 
 interface AlergiasModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (recargar?: boolean) => void;
   ninId: number;
   ninNombre: string;
 }
@@ -38,6 +38,7 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
   });
   const [allergyQuery, setAllergyQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [cambiosRealizados, setCambiosRealizados] = useState<boolean>(false);
 
   const loadAllergies = async () => {
     setLoading(true);
@@ -54,6 +55,7 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
   useEffect(() => {
     if (open) {
       loadAllergies();
+      setCambiosRealizados(false);
     }
   }, [open, ninId]);
 
@@ -78,6 +80,7 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
       await loadAllergies();
       setNewAllergy({ ta_codigo: '', severidad: 'LEVE' });
       setAllergyQuery('');
+      setCambiosRealizados(true);
       toast.success('Alergia agregada', {
         description: 'La alergia se registró correctamente.',
       });
@@ -95,6 +98,7 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
     const ok = await removeAllergy.execute(ninId, allergyId);
     if (ok) {
       await loadAllergies();
+      setCambiosRealizados(true);
       toast.success('Alergia eliminada', {
         description: 'La alergia se eliminó correctamente.',
       });
@@ -105,8 +109,12 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
     }
   };
 
+  const handleClose = () => {
+    onClose(cambiosRealizados);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -235,7 +243,7 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
 
           {/* Botón cerrar */}
           <div className="flex justify-end pt-4 border-t">
-            <Button onClick={onClose} variant="outline">
+            <Button onClick={handleClose} variant="outline">
               Cerrar
             </Button>
           </div>

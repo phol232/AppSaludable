@@ -8,7 +8,7 @@ import { VerPlanModal } from './VerPlanModal';
 
 interface GenerarPlanModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (recargar?: boolean) => void;
   ninId: number;
   ninNombre: string;
 }

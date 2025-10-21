@@ -15,7 +15,7 @@ import { obtenerDetalleMenu, generarPlanCompletoConLLM, obtenerDetalleReceta } f
 
 interface VerPlanModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (recargar?: boolean) => void;
   ninId: number;
   ninNombre: string;
   menId?: number;
@@ -50,10 +50,12 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
   const [generando, setGenerando] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [progreso, setProgreso] = useState<string[]>([]);
+  const [planGenerado, setPlanGenerado] = useState(false);
 
   useEffect(() => {
     if (open && menId) {
       cargarPlan();
+      setPlanGenerado(false);
     }
   }, [open, menId]);
 
@@ -149,6 +151,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
       if (resultado.men_id) {
         const data = await obtenerDetalleMenu(resultado.men_id);
         setPlan(data);
+        setPlanGenerado(true);
       }
 
       toast({
@@ -327,11 +330,10 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                     key={dia.dia_idx}
                     onClick={() => setDiaSeleccionado(dia.dia_idx)}
                     variant={diaSeleccionado === dia.dia_idx ? 'default' : 'outline'}
-                    className={`${
-                      diaSeleccionado === dia.dia_idx
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : ''
-                    }`}
+                    className={`${diaSeleccionado === dia.dia_idx
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : ''
+                      }`}
                   >
                     {dia.dia_nombre}
                   </Button>
@@ -516,7 +518,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
               Generar Nuevo
             </Button>
           )}
-          <Button onClick={onClose} variant="outline">
+          <Button onClick={() => onClose(planGenerado)} variant="outline">
             Cerrar
           </Button>
         </div>

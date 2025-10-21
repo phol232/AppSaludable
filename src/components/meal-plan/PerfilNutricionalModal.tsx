@@ -20,7 +20,7 @@ import type { PerfilNutricional } from '../../types/mealPlan';
 
 interface PerfilNutricionalModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (recargar?: boolean) => void;
   ninId: number;
   ninNombre: string;
 }
@@ -71,6 +71,8 @@ export const PerfilNutricionalModal: React.FC<PerfilNutricionalModalProps> = ({
         description: 'El perfil nutricional se calculó exitosamente',
       });
       await cargarPerfil();
+      // Notificar que hubo cambios para recargar la lista
+      onClose(true);
     } catch (error) {
       toast({
         title: 'Error',
