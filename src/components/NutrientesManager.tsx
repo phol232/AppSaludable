@@ -13,7 +13,7 @@ import { NutrienteResponse, AlimentoNutrienteResponse } from '../types/api';
 interface NutrientesManagerProps {
   nutrientes: AlimentoNutrienteResponse[];
   onNutrientesChange: (nutrientes: AlimentoNutrienteResponse[]) => void;
-  alimentoId?: number; // Para edición de alimentos existentes
+  alimentoId?: number; 
   disabled?: boolean;
 }
 
@@ -78,6 +78,7 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Evitar que el evento se propague al formulario padre
     
     if (formData.nutri_id === 0) {
       toast.error('Selecciona un nutriente');
@@ -101,23 +102,25 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
     setIsLoading(true);
 
     try {
-      if (alimentoId && editingNutriente) {
-        // Editar nutriente existente - eliminar y agregar de nuevo
-        await alimentosRecetasApi.deleteNutrienteFromAlimento(alimentoId, editingNutriente.nutri_id);
-        await alimentosRecetasApi.addNutrienteToAlimento(alimentoId, {
-          ali_id: alimentoId,
-          ...formData,
-        });
-      } else if (alimentoId) {
-        // Agregar nuevo nutriente a alimento existente
-        await alimentosRecetasApi.addNutrienteToAlimento(alimentoId, {
-          ali_id: alimentoId,
-          ...formData,
-        });
+      // Solo hacer llamadas a la API si el alimento ya existe (tiene alimentoId)
+      if (alimentoId) {
+        if (editingNutriente) {
+          // Editar nutriente existente - eliminar y agregar de nuevo
+          await alimentosRecetasApi.deleteNutrienteFromAlimento(alimentoId, editingNutriente.nutri_id);
+          await alimentosRecetasApi.addNutrienteToAlimento(alimentoId, {
+            ali_id: alimentoId,
+            ...formData,
+          });
+        } else {
+          // Agregar nuevo nutriente a alimento existente
+          await alimentosRecetasApi.addNutrienteToAlimento(alimentoId, {
+            ali_id: alimentoId,
+            ...formData,
+          });
+        }
       }
 
-      // Actualizar la lista local
-      const nutrienteInfo = availableNutrientes.find(n => n.nutri_id === formData.nutri_id);
+      // Actualizar la lista local (tanto para alimentos existentes como nuevos)
       const newNutriente: AlimentoNutrienteResponse = {
         ali_id: alimentoId || 0,
         nutri_id: formData.nutri_id,
@@ -136,7 +139,13 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
 
       onNutrientesChange(updatedNutrientes);
       setIsDialogOpen(false);
-      toast.success(editingNutriente ? 'Nutriente actualizado' : 'Nutriente agregado');
+      
+      // Mensaje diferente según si es un alimento nuevo o existente
+      if (alimentoId) {
+        toast.success(editingNutriente ? 'Nutriente actualizado' : 'Nutriente agregado');
+      } else {
+        toast.success(editingNutriente ? 'Nutriente actualizado en el formulario' : 'Nutriente agregado al formulario');
+      }
     } catch (error) {
       toast.error('Error al guardar nutriente');
     } finally {
@@ -145,6 +154,7 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
   };
 
   const handleDelete = async (nutriente: AlimentoNutrienteResponse) => {
+    // Solo hacer llamada a la API si el alimento ya existe
     if (alimentoId) {
       try {
         await alimentosRecetasApi.deleteNutrienteFromAlimento(alimentoId, nutriente.nutri_id);
@@ -153,6 +163,9 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
         toast.error('Error al eliminar nutriente');
         return;
       }
+    } else {
+      // Para alimentos nuevos, solo mostrar mensaje local
+      toast.success('Nutriente eliminado del formulario');
     }
 
     const updatedNutrientes = nutrientes.filter(n => n.nutri_id !== nutriente.nutri_id);

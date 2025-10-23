@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Switch } from '../ui/switch';
 import { AlimentoCreate, AlimentoUpdate, AlimentoResponse, AlimentoNutrienteResponse } from '../../types/api';
 import { NutrientesManager } from '../NutrientesManager';
+import { alimentosRecetasApi } from '../../services/alimentosRecetasApi';
+import { toast } from 'sonner';
 
 interface AlimentoFormProps {
   initialData?: AlimentoResponse;
@@ -60,6 +62,32 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [nutrientes, setNutrientes] = useState<AlimentoNutrienteResponse[]>([]);
+
+  // Cargar nutrientes existentes cuando se edita un alimento
+  useEffect(() => {
+    const loadNutrientesExistentes = async () => {
+      if (isEdit && alimentoId) {
+        try {
+          const response = await alimentosRecetasApi.getAlimento(alimentoId);
+          if (response.success && response.data && response.data.nutrientes) {
+            // Convertir los nutrientes del formato de respuesta al formato esperado
+            const nutrientesFormateados = response.data.nutrientes.map(nutriente => ({
+              ali_id: alimentoId,
+              nutri_id: nutriente.nutri_id,
+              an_cantidad_100: nutriente.an_cantidad_100,
+              an_fuente: nutriente.an_fuente
+            }));
+            setNutrientes(nutrientesFormateados);
+          }
+        } catch (error) {
+          console.error('Error al cargar nutrientes existentes:', error);
+          toast.error('Error al cargar los nutrientes del alimento');
+        }
+      }
+    };
+
+    loadNutrientesExistentes();
+  }, [isEdit, alimentoId]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
