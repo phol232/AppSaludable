@@ -286,7 +286,10 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleOpenDialog(nutriente)}
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          handleOpenDialog(nutriente);
+                        }}
                         disabled={disabled}
                       >
                         <Edit className="h-4 w-4" />
@@ -294,7 +297,10 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(nutriente)}
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          handleDelete(nutriente);
+                        }}
                         disabled={disabled}
                       >
                         <Trash2 className="h-4 w-4" />
