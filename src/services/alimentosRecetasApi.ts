@@ -28,7 +28,9 @@ class AlimentosRecetasApiService {
     const trimmedBase = this.baseURL.replace(/\/$/, '');
     const basePath = `${trimmedBase}/api`;
     const versionSegment = `/${this.apiVersion}`;
-    return `${basePath}${versionSegment}${endpoint}`;
+    // Asegurar que el endpoint comience con /
+    const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    return `${basePath}${versionSegment}${normalizedEndpoint}`;
   }
 
   private async makeRequest<T>(
