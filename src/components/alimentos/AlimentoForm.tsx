@@ -5,12 +5,14 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Switch } from '../ui/switch';
-import { AlimentoCreate, AlimentoUpdate, AlimentoResponse } from '../../types/api';
+import { AlimentoCreate, AlimentoUpdate, AlimentoResponse, AlimentoNutrienteResponse } from '../../types/api';
+import { NutrientesManager } from '../NutrientesManager';
 
 interface AlimentoFormProps {
   initialData?: AlimentoResponse;
-  onSubmit: (data: AlimentoCreate | AlimentoUpdate) => void;
+  onSubmit: (data: AlimentoCreate | AlimentoUpdate, nutrientes?: AlimentoNutrienteResponse[]) => void;
   isEdit?: boolean;
+  alimentoId?: number;
 }
 
 const GRUPOS_ALIMENTOS = [
@@ -45,7 +47,8 @@ const UNIDADES = [
 const AlimentoForm: React.FC<AlimentoFormProps> = ({ 
   initialData, 
   onSubmit, 
-  isEdit = false 
+  isEdit = false,
+  alimentoId
 }) => {
   const [formData, setFormData] = useState({
     ali_nombre: initialData?.ali_nombre || '',
@@ -56,6 +59,7 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [nutrientes, setNutrientes] = useState<AlimentoNutrienteResponse[]>([]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -93,7 +97,7 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
       ali_grupo: (formData.ali_grupo && formData.ali_grupo !== 'placeholder') ? formData.ali_grupo : undefined,
     };
 
-    onSubmit(submitData);
+    onSubmit(submitData, nutrientes);
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -199,6 +203,16 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
           />
           <Label htmlFor="ali_activo">Alimento activo</Label>
         </div>
+      </div>
+
+      {/* Gestión de nutrientes */}
+      <div className="border-t pt-6">
+        <NutrientesManager
+          alimentoId={alimentoId}
+          nutrientes={nutrientes}
+          onNutrientesChange={setNutrientes}
+          disabled={false}
+        />
       </div>
 
       {/* Botones de acción */}

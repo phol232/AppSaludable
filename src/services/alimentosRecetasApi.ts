@@ -230,11 +230,39 @@ class AlimentosRecetasApiService {
 
   // ========== MÉTODOS PARA NUTRIENTES ==========
 
+  // ========== MÉTODOS PARA NUTRIENTES DE ALIMENTOS ==========
+
+  /**
+   * Agregar nutriente a un alimento
+   */
+  async addNutrienteToAlimento(aliId: number, nutrienteData: { ali_id: number; nutri_id: number; an_cantidad_100: number; an_fuente?: string }): Promise<ApiResponse<{ message: string }>> {
+    const url = this.getApiUrl(`/nutricion/alimentos/${aliId}/nutrientes`);
+    return this.makeRequest<{ message: string }>(url, {
+      method: 'POST',
+      body: JSON.stringify(nutrienteData),
+    });
+  }
+
+  /**
+   * Eliminar nutriente de un alimento
+   */
+  async deleteNutrienteFromAlimento(aliId: number, nutriId: number): Promise<ApiResponse<{ message: string }>> {
+    const url = this.getApiUrl(`/nutricion/alimentos/${aliId}/nutrientes/${nutriId}`);
+    return this.makeRequest<{ message: string }>(url, {
+      method: 'DELETE',
+    });
+  }
+
+  // ========== MÉTODOS PARA NUTRIENTES ==========
+
   /**
    * Obtener lista de nutrientes
    */
   async getNutrientes(limit: number = 100): Promise<ApiResponse<NutrienteResponse[]>> {
-    const url = this.getApiUrl(`/nutricion/nutrientes?limit=${limit}`);
+    const params = new URLSearchParams();
+    params.append('limit', limit.toString());
+    
+    const url = this.getApiUrl(`/nutricion/nutrientes?${params.toString()}`);
     return this.makeRequest<NutrienteResponse[]>(url);
   }
 

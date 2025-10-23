@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useToast } from '../components/ui/use-toast';
 import { alimentosRecetasApi } from '../services/alimentosRecetasApi';
-import { AlimentoResponse, AlimentoCreate, AlimentoUpdate, AlimentoConNutrientesResponse } from '../types/api';
+import { AlimentoResponse, AlimentoCreate, AlimentoUpdate, AlimentoConNutrientesResponse, AlimentoNutrienteResponse } from '../types/api';
 import AlimentoForm from '../components/alimentos/AlimentoForm';
 import AlimentoDetail from '../components/alimentos/AlimentoDetail';
 
@@ -163,12 +163,72 @@ const AlimentosPage: React.FC = () => {
     }
    };
 
-  const handleCreateAlimentoWrapper = (alimentoData: AlimentoCreate | AlimentoUpdate) => {
-    handleCreateAlimento(alimentoData as AlimentoCreate);
+  const handleCreateAlimentoWrapper = async (alimentoData: AlimentoCreate | AlimentoUpdate, nutrientes?: AlimentoNutrienteResponse[]) => {
+    try {
+      const response = await alimentosRecetasApi.createAlimento(alimentoData as AlimentoCreate);
+      if (response.success && response.data && nutrientes && nutrientes.length > 0) {
+        // Agregar nutrientes al alimento creado
+        for (const nutriente of nutrientes) {
+           await alimentosRecetasApi.addNutrienteToAlimento(response.data.ali_id, {
+             ali_id: response.data.ali_id,
+             nutri_id: nutriente.nutri_id,
+             an_cantidad_100: nutriente.an_cantidad_100,
+             an_fuente: nutriente.an_fuente
+           });
+         }
+      }
+      
+      if (response.success) {
+        toast({
+          title: 'Éxito',
+          description: 'Alimento creado correctamente',
+        });
+        setIsCreateDialogOpen(false);
+        loadAlimentos();
+      } else {
+        toast({
+          title: 'Error',
+          description: response.error || 'Error al crear el alimento',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Error al crear el alimento',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const handleUpdateAlimentoWrapper = (alimentoData: AlimentoCreate | AlimentoUpdate) => {
-    handleUpdateAlimento(alimentoData as AlimentoUpdate);
+  const handleUpdateAlimentoWrapper = async (alimentoData: AlimentoCreate | AlimentoUpdate, nutrientes?: AlimentoNutrienteResponse[]) => {
+    if (!selectedAlimento) return;
+
+    try {
+      const response = await alimentosRecetasApi.updateAlimento(selectedAlimento.ali_id, alimentoData as AlimentoUpdate);
+      
+      if (response.success) {
+        toast({
+          title: 'Éxito',
+          description: 'Alimento actualizado correctamente',
+        });
+        setIsEditDialogOpen(false);
+        setSelectedAlimento(null);
+        loadAlimentos();
+      } else {
+        toast({
+          title: 'Error',
+          description: response.error || 'Error al actualizar el alimento',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Error al actualizar el alimento',
+        variant: 'destructive',
+      });
+    }
   };
 
   const alimentosFiltrados = alimentos.filter(alimento => {
@@ -347,6 +407,7 @@ const AlimentosPage: React.FC = () => {
               initialData={selectedAlimento} 
               onSubmit={handleUpdateAlimentoWrapper}
               isEdit
+              alimentoId={selectedAlimento.ali_id}
             />
           )}
         </DialogContent>
