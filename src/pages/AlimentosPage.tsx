@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useToast } from '../components/ui/use-toast';
 import { alimentosRecetasApi } from '../services/alimentosRecetasApi';
-import { AlimentoResponse, AlimentoCreate, AlimentoUpdate } from '../types/api';
+import { AlimentoResponse, AlimentoCreate, AlimentoUpdate, AlimentoConNutrientesResponse } from '../types/api';
 import AlimentoForm from '../components/alimentos/AlimentoForm';
 import AlimentoDetail from '../components/alimentos/AlimentoDetail';
 
@@ -18,6 +18,7 @@ const AlimentosPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filtroGrupo, setFiltroGrupo] = useState<string>('');
   const [selectedAlimento, setSelectedAlimento] = useState<AlimentoResponse | null>(null);
+  const [alimentoDetalle, setAlimentoDetalle] = useState<AlimentoConNutrientesResponse | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
@@ -140,12 +141,42 @@ const AlimentosPage: React.FC = () => {
     }
   };
 
+  const loadAlimentoDetalle = async (aliId: number) => {
+    try {
+      const response = await alimentosRecetasApi.getAlimento(aliId);
+      if (response.success && response.data) {
+        setAlimentoDetalle(response.data);
+        setIsDetailDialogOpen(true);
+      } else {
+        toast({
+          title: 'Error',
+          description: 'No se pudieron cargar los detalles del alimento',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Error al cargar los detalles del alimento',
+        variant: 'destructive',
+      });
+    }
+   };
+
+  const handleCreateAlimentoWrapper = (alimentoData: AlimentoCreate | AlimentoUpdate) => {
+    handleCreateAlimento(alimentoData as AlimentoCreate);
+  };
+
+  const handleUpdateAlimentoWrapper = (alimentoData: AlimentoCreate | AlimentoUpdate) => {
+    handleUpdateAlimento(alimentoData as AlimentoUpdate);
+  };
+
   const alimentosFiltrados = alimentos.filter(alimento => {
     const matchesSearch = !searchQuery || 
       alimento.ali_nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (alimento.ali_nombre_cientifico && alimento.ali_nombre_cientifico.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    const matchesGrupo = !filtroGrupo || alimento.ali_grupo === filtroGrupo;
+    const matchesGrupo = !filtroGrupo || filtroGrupo === 'all' || alimento.ali_grupo === filtroGrupo;
     
     return matchesSearch && matchesGrupo;
   });
@@ -169,7 +200,7 @@ const AlimentosPage: React.FC = () => {
             <DialogHeader>
               <DialogTitle>Crear Nuevo Alimento</DialogTitle>
             </DialogHeader>
-            <AlimentoForm onSubmit={handleCreateAlimento} />
+            <AlimentoForm onSubmit={handleCreateAlimentoWrapper} />
           </DialogContent>
         </Dialog>
       </div>
@@ -197,7 +228,7 @@ const AlimentosPage: React.FC = () => {
                   <SelectValue placeholder="Filtrar por grupo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los grupos</SelectItem>
+                  <SelectItem value="all">Todos los grupos</SelectItem>
                   {gruposUnicos.map(grupo => (
                     <SelectItem key={grupo} value={grupo!}>
                       {grupo}
@@ -273,10 +304,7 @@ const AlimentosPage: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            setSelectedAlimento(alimento);
-                            setIsDetailDialogOpen(true);
-                          }}
+                          onClick={() => loadAlimentoDetalle(alimento.ali_id)}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -317,7 +345,7 @@ const AlimentosPage: React.FC = () => {
           {selectedAlimento && (
             <AlimentoForm 
               initialData={selectedAlimento} 
-              onSubmit={handleUpdateAlimento}
+              onSubmit={handleUpdateAlimentoWrapper}
               isEdit
             />
           )}
@@ -330,8 +358,8 @@ const AlimentosPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Detalle del Alimento</DialogTitle>
           </DialogHeader>
-          {selectedAlimento && (
-            <AlimentoDetail alimentoId={selectedAlimento.ali_id} />
+          {alimentoDetalle && (
+            <AlimentoDetail alimento={alimentoDetalle} />
           )}
         </DialogContent>
       </Dialog>

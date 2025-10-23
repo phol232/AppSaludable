@@ -149,7 +149,7 @@ const RecetasPage: React.FC = () => {
   };
 
   const handleTipoComidaChange = (value: string) => {
-    setSelectedTipoComida(value);
+    setSelectedTipoComida(value === 'all' ? '' : value);
     loadRecetas(); // Recargar con el filtro aplicado
   };
 
@@ -211,7 +211,7 @@ const RecetasPage: React.FC = () => {
                   <SelectValue placeholder="Tipo de comida" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los tipos</SelectItem>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
                   {TIPOS_COMIDA.map((tipo) => (
                     <SelectItem key={tipo} value={tipo}>
                       {tipo}

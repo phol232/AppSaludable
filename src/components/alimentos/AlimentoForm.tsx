@@ -90,7 +90,7 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
     const submitData = {
       ...formData,
       ali_nombre_cientifico: formData.ali_nombre_cientifico || undefined,
-      ali_grupo: formData.ali_grupo || undefined,
+      ali_grupo: (formData.ali_grupo && formData.ali_grupo !== 'placeholder') ? formData.ali_grupo : undefined,
     };
 
     onSubmit(submitData);
@@ -157,7 +157,7 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
               <SelectValue placeholder="Seleccionar grupo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Sin grupo</SelectItem>
+              <SelectItem value="placeholder">Seleccionar grupo</SelectItem>
               {GRUPOS_ALIMENTOS.map((grupo) => (
                 <SelectItem key={grupo} value={grupo}>
                   {grupo}
