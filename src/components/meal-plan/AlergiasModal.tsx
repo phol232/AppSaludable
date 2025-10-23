@@ -1,7 +1,3 @@
-/**
- * Modal para gestionar alergias alimentarias del niño
- * Reutiliza la lógica de AllergiesAndEntities.tsx
- */
 import React, { useEffect, useState } from 'react';
 import {
   Dialog,
@@ -59,7 +55,6 @@ export const AlergiasModal: React.FC<AlergiasModalProps> = ({
     }
   }, [open, ninId]);
 
-  // Buscar tipos de alergia
   useEffect(() => {
     if (!allergyQuery) {
       setAllergyTypes([]);

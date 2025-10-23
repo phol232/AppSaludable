@@ -1,6 +1,3 @@
-/**
- * Modal para ver el plan de comidas semanal en formato grid
- */
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -65,23 +62,19 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     setCargando(true);
     try {
       const data = await obtenerDetalleMenu(menId);
-
-      // Transformar los datos: items[] -> desayuno, almuerzo, cena
       if (data.dias && Array.isArray(data.dias)) {
         data.dias = data.dias.map((dia: any) => {
           const transformed: any = {
             dia_idx: dia.dia_idx,
             dia_nombre: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'][dia.dia_idx] || `Día ${dia.dia_idx + 1}`,
-            fecha: data.men_inicio, // Calcular fecha correcta
+            fecha: data.men_inicio, 
             total_dia: 0
           };
 
-          // Calcular fecha del día
           const fechaInicio = new Date(data.men_inicio);
           fechaInicio.setDate(fechaInicio.getDate() + dia.dia_idx);
           transformed.fecha = fechaInicio.toISOString().split('T')[0];
 
-          // Transformar items a desayuno/almuerzo/cena
           if (dia.items && Array.isArray(dia.items)) {
             dia.items.forEach((item: any) => {
               const comida = {

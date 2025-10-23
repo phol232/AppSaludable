@@ -1,6 +1,3 @@
-/**
- * Modal para gestionar comidas favoritas del niño
- */
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,

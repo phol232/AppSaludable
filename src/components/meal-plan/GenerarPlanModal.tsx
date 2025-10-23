@@ -1,7 +1,3 @@
-/**
- * Modal para ver y generar plan de comidas completo (Lunes-Domingo, Desayuno-Cena)
- * Ahora redirige al VerPlanModal para mostrar el plan
- */
 import React, { useState, useEffect } from 'react';
 import { listarMenusNino } from '../../services/mealPlanApi';
 import { VerPlanModal } from './VerPlanModal';
@@ -44,7 +40,6 @@ export const GenerarPlanModal: React.FC<GenerarPlanModalProps> = ({
     }
   };
 
-  // Simplemente redirigir al VerPlanModal
   return (
     <VerPlanModal
       open={open}
