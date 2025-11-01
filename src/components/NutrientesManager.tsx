@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -13,7 +13,7 @@ import { NutrienteResponse, AlimentoNutrienteResponse } from '../types/api';
 interface NutrientesManagerProps {
   nutrientes: AlimentoNutrienteResponse[];
   onNutrientesChange: (nutrientes: AlimentoNutrienteResponse[]) => void;
-  alimentoId?: number; 
+  alimentoId?: number;
   disabled?: boolean;
 }
 
@@ -79,7 +79,7 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation(); // Evitar que el evento se propague al formulario padre
-    
+
     if (formData.nutri_id === 0) {
       toast.error('Selecciona un nutriente');
       return;
@@ -130,7 +130,7 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
 
       let updatedNutrientes;
       if (editingNutriente) {
-        updatedNutrientes = nutrientes.map(n => 
+        updatedNutrientes = nutrientes.map(n =>
           n.nutri_id === editingNutriente.nutri_id ? newNutriente : n
         );
       } else {
@@ -139,7 +139,7 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
 
       onNutrientesChange(updatedNutrientes);
       setIsDialogOpen(false);
-      
+
       // Mensaje diferente según si es un alimento nuevo o existente
       if (alimentoId) {
         toast.success(editingNutriente ? 'Nutriente actualizado' : 'Nutriente agregado');
@@ -198,6 +198,11 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
               <DialogTitle>
                 {editingNutriente ? 'Editar Nutriente' : 'Agregar Nutriente'}
               </DialogTitle>
+              <DialogDescription>
+                {editingNutriente 
+                  ? 'Modifica la cantidad y fuente del nutriente seleccionado'
+                  : 'Agrega información nutricional para este alimento (cantidad por 100g/100ml)'}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -284,9 +289,11 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
                   <TableCell>
                     <div className="flex space-x-1">
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={(e: React.MouseEvent) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           handleOpenDialog(nutriente);
                         }}
@@ -295,9 +302,11 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={(e: React.MouseEvent) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           handleDelete(nutriente);
                         }}

@@ -76,7 +76,7 @@ class AlimentosRecetasApiService {
     const params = new URLSearchParams();
     if (q) params.append('q', q);
     params.append('limit', limit.toString());
-    
+
     const url = this.getApiUrl(`/nutricion/alimentos?${params.toString()}`);
     return this.makeRequest<AlimentoResponse[]>(url);
   }
@@ -130,7 +130,7 @@ class AlimentosRecetasApiService {
     const params = new URLSearchParams();
     if (tipoComida) params.append('tipo_comida', tipoComida);
     params.append('limit', limit.toString());
-    
+
     const url = this.getApiUrl(`/nutricion/recetas?${params.toString()}`);
     return this.makeRequest<RecetaResponse[]>(url);
   }
@@ -263,7 +263,7 @@ class AlimentosRecetasApiService {
   async getNutrientes(limit: number = 100): Promise<ApiResponse<NutrienteResponse[]>> {
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
-    
+
     const url = this.getApiUrl(`/nutricion/nutrientes?${params.toString()}`);
     return this.makeRequest<NutrienteResponse[]>(url);
   }
@@ -275,7 +275,7 @@ class AlimentosRecetasApiService {
     const params = new URLSearchParams();
     if (query) params.append('q', query);
     if (tipoComida) params.append('tipo_comida', tipoComida);
-    
+
     const url = this.getApiUrl(`/planes-comidas/recetas/buscar?${params.toString()}`);
     return this.makeRequest<RecetaResponse[]>(url);
   }

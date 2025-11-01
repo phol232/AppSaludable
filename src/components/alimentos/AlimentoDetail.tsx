@@ -28,19 +28,19 @@ const AlimentoDetail: React.FC<AlimentoDetailProps> = ({ alimento }) => {
                 <p className="text-sm italic">{alimento.ali_nombre_cientifico}</p>
               </div>
             )}
-            
+
             {alimento.ali_grupo && (
               <div>
                 <h4 className="font-medium text-sm text-gray-600">Grupo alimentario</h4>
                 <p className="text-sm">{alimento.ali_grupo}</p>
               </div>
             )}
-            
+
             <div>
               <h4 className="font-medium text-sm text-gray-600">Unidad de medida</h4>
               <p className="text-sm">{alimento.ali_unidad}</p>
             </div>
-            
+
             <div>
               <h4 className="font-medium text-sm text-gray-600">ID</h4>
               <p className="text-sm font-mono">{alimento.ali_id}</p>
@@ -61,8 +61,8 @@ const AlimentoDetail: React.FC<AlimentoDetailProps> = ({ alimento }) => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {alimento.nutrientes.map((nutriente) => (
-                <div 
-                  key={nutriente.nutri_id} 
+                <div
+                  key={nutriente.nutri_id}
                   className="p-3 border rounded-lg bg-gray-50"
                 >
                   <h4 className="font-medium text-sm">{nutriente.nutri_nombre}</h4>

@@ -46,9 +46,9 @@ const UNIDADES = [
   'porción'
 ];
 
-const AlimentoForm: React.FC<AlimentoFormProps> = ({ 
-  initialData, 
-  onSubmit, 
+const AlimentoForm: React.FC<AlimentoFormProps> = ({
+  initialData,
+  onSubmit,
   isEdit = false,
   alimentoId
 }) => {
@@ -114,7 +114,7 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -181,8 +181,8 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
         {/* Grupo alimentario */}
         <div>
           <Label htmlFor="ali_grupo">Grupo alimentario</Label>
-          <Select 
-            value={formData.ali_grupo} 
+          <Select
+            value={formData.ali_grupo}
             onValueChange={(value: string) => handleInputChange('ali_grupo', value)}
           >
             <SelectTrigger className={errors.ali_grupo ? 'border-red-500' : ''}>
@@ -205,8 +205,8 @@ const AlimentoForm: React.FC<AlimentoFormProps> = ({
         {/* Unidad de medida */}
         <div>
           <Label htmlFor="ali_unidad">Unidad de medida</Label>
-          <Select 
-            value={formData.ali_unidad} 
+          <Select
+            value={formData.ali_unidad}
             onValueChange={(value: string) => handleInputChange('ali_unidad', value)}
           >
             <SelectTrigger>

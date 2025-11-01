@@ -73,7 +73,7 @@ export const PreferenciasModal: React.FC<PreferenciasModalProps> = ({
         title: 'Preferencias guardadas',
         description: `Las preferencias de ${ninNombre} se guardaron exitosamente`,
       });
-      onClose(true); 
+      onClose(true);
     } catch (error) {
       toast({
         title: 'Error',
