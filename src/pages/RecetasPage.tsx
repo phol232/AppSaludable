@@ -133,7 +133,7 @@ const RecetasPage: React.FC<RecetasPageProps> = ({ embedded = false }) => {
         // 1. Eliminar ingredientes que ya no están
         // 2. Agregar nuevos ingredientes
         // 3. Actualizar cantidades de ingredientes existentes
-        
+
         // Por simplicidad, solo agregamos los nuevos
         for (const ing of data.ingredientes) {
           try {

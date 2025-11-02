@@ -13,7 +13,7 @@ const ComidasPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Comidas</h1>
-            
+
             {/* Tabs Navigation */}
             <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
               <button
@@ -29,7 +29,7 @@ const ComidasPage: React.FC = () => {
                 <Apple className="w-5 h-5" />
                 Alimentos
               </button>
-              
+
               <button
                 onClick={() => setActiveTab('recetas')}
                 className={`

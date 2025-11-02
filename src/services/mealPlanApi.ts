@@ -496,16 +496,16 @@ export const descargarPlanPdf = async (
 ): Promise<Blob> => {
   // Usar el método del servicio para obtener el token correctamente
   const token = apiService.getToken();
-  
+
   if (!token) {
     throw new Error('No se encontró token de autenticación. Por favor, inicia sesión nuevamente.');
   }
 
   const url = `${(apiService as any).getApiUrl(`/planes-comidas/ninos/${ninId}/planes/${menId}/pdf`)}`;
-  
+
   console.log('🔍 Descargando PDF desde:', url);
   console.log('✅ Token encontrado:', !!token);
-  
+
   const response = await fetch(url, {
     method: 'GET',
     headers: {
@@ -517,7 +517,7 @@ export const descargarPlanPdf = async (
   if (!response.ok) {
     const errorText = await response.text();
     console.error('❌ Error en descarga PDF:', response.status, errorText);
-    
+
     if (response.status === 401) {
       throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
     }

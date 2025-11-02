@@ -23,7 +23,7 @@ const RecetaDetail: React.FC<RecetaDetailProps> = ({ receta }) => {
 
     receta.ingredientes.forEach(ing => {
       const cantidadEnGramos = ing.ri_cantidad;
-      
+
       // Valores promedio por 100g (estos son estimaciones)
       // En producción deberían venir de la tabla alimentos_nutrientes
       const kcalPor100g = 150; // Promedio
@@ -46,9 +46,9 @@ const RecetaDetail: React.FC<RecetaDetailProps> = ({ receta }) => {
   }, [receta.ingredientes]);
 
   // Usar información nutricional del backend si existe y no está vacía, sino usar calculada
-  const informacionNutricional = 
+  const informacionNutricional =
     receta.informacion_nutricional && Object.keys(receta.informacion_nutricional).length > 0
-      ? receta.informacion_nutricional 
+      ? receta.informacion_nutricional
       : nutricionCalculada;
 
   return (

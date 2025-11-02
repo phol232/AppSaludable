@@ -29,7 +29,7 @@ const RecetaFormNew: React.FC<RecetaFormProps> = ({
   isEdit = false
 }) => {
   const { toast } = useToast();
-  
+
   const [formData, setFormData] = useState({
     rec_nombre: initialData?.rec_nombre || '',
     rec_instrucciones: initialData?.rec_instrucciones || '',
@@ -55,7 +55,7 @@ const RecetaFormNew: React.FC<RecetaFormProps> = ({
 
   const loadIngredientes = async () => {
     if (!initialData?.rec_id) return;
-    
+
     try {
       const response = await alimentosRecetasApi.getReceta(initialData.rec_id);
       if (response.data?.ingredientes) {
@@ -132,7 +132,7 @@ const RecetaFormNew: React.FC<RecetaFormProps> = ({
         cantidad: parseFloat(cantidad) || 0,
         unidad
       };
-      
+
       if (nuevoIngrediente.cantidad <= 0) {
         toast({
           title: 'Error',
@@ -147,7 +147,7 @@ const RecetaFormNew: React.FC<RecetaFormProps> = ({
       setCantidad('');
       setUnidad('g');
       setSelectedAlimento(null);
-      
+
       toast({
         title: 'Ingrediente agregado',
         description: `"${nuevoIngrediente.ali_nombre}" agregado correctamente`
@@ -344,7 +344,7 @@ const RecetaFormNew: React.FC<RecetaFormProps> = ({
                   className="pl-10"
                   autoComplete="off"
                 />
-                
+
                 {/* Dropdown de resultados - aparece ENCIMA del input */}
                 {isInputFocused && searching && searchTerm.length >= 2 && (
                   <div className="absolute left-0 right-0 bottom-full mb-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
@@ -353,7 +353,7 @@ const RecetaFormNew: React.FC<RecetaFormProps> = ({
                     </div>
                   </div>
                 )}
-                
+
                 {isInputFocused && !searching && searchResults.length > 0 && searchTerm.length >= 2 && (
                   <div className="absolute left-0 right-0 bottom-full mb-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
                     {searchResults.map((alimento) => (
@@ -371,7 +371,7 @@ const RecetaFormNew: React.FC<RecetaFormProps> = ({
                     ))}
                   </div>
                 )}
-                
+
                 {isInputFocused && !searching && searchResults.length === 0 && searchTerm.length >= 2 && (
                   <div className="absolute left-0 right-0 bottom-full mb-1 bg-white border border-gray-300 rounded-md shadow-lg z-50">
                     <div className="p-3 text-sm text-gray-500 text-center">
@@ -465,7 +465,7 @@ const RecetaFormNew: React.FC<RecetaFormProps> = ({
 
       {/* Botones de acción */}
       <div className="flex justify-end space-x-2 pt-4">
-        <Button 
+        <Button
           type="submit"
           style={{ backgroundColor: '#2563eb', color: 'white' }}
         >

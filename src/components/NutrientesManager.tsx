@@ -199,7 +199,7 @@ export const NutrientesManager: React.FC<NutrientesManagerProps> = ({
                 {editingNutriente ? 'Editar Nutriente' : 'Agregar Nutriente'}
               </DialogTitle>
               <DialogDescription>
-                {editingNutriente 
+                {editingNutriente
                   ? 'Modifica la cantidad y fuente del nutriente seleccionado'
                   : 'Agrega información nutricional para este alimento (cantidad por 100g/100ml)'}
               </DialogDescription>

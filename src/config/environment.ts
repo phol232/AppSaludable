@@ -3,11 +3,11 @@
 
 export const config = {
   // URLs de producción en US-EAST1
-  API_BASE_URL: 'https://nutricion-backend-343042748851.us-east1.run.app',
-  ML_API_BASE_URL: 'https://nutricion-modelo-ml-343042748851.us-east1.run.app',
+  API_BASE_URL: 'https://backend.tecno-express.shop',
+  ML_API_BASE_URL: 'https://modelo.tecno-express.shop',
   API_VERSION: 'v1',
   TOKEN_KEY: 'auth_token',
-  
+
   // Información de la app
   APP_NAME: 'App Saludable',
   APP_VERSION: '1.0.0',
@@ -26,7 +26,7 @@ export const getConfig = () => {
       APP_VERSION: import.meta.env.VITE_APP_VERSION || config.APP_VERSION,
     };
   }
-  
+
   // En producción, usar las URLs hardcodeadas (US-EAST1)
   return config;
 };

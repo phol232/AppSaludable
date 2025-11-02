@@ -8,11 +8,11 @@ import {
 import { Button } from '../ui/button';
 import { useToast } from '../ui/use-toast';
 import { Loader2, Calendar, Sparkles, RefreshCw, FileDown } from 'lucide-react';
-import { 
-  obtenerDetalleMenu, 
-  generarPlanCompletoConLLM, 
+import {
+  obtenerDetalleMenu,
+  generarPlanCompletoConLLM,
   obtenerDetalleReceta,
-  descargarPlanPdf 
+  descargarPlanPdf
 } from '../../services/mealPlanApi';
 
 interface VerPlanModalProps {
@@ -61,7 +61,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
       setDiaSeleccionado(0); // Reset día seleccionado al abrir
     }
   }, [open, menId, ninId]); // Agregar ninId como dependencia
-  
+
   // Resetear estado cuando cambia el niño
   useEffect(() => {
     if (open) {
@@ -158,7 +158,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
       if (resultado.men_id) {
         setProgreso((prev) => [...prev, '📥 Cargando plan generado...']);
         const data = await obtenerDetalleMenu(resultado.men_id);
-        
+
         // Transformar datos igual que en cargarPlan
         if (data.dias && Array.isArray(data.dias)) {
           data.dias = data.dias.map((dia: any) => {
@@ -198,12 +198,12 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
             return transformed;
           });
         }
-        
+
         setPlan(data);
         setPlanGenerado(true);
         setDiaSeleccionado(0); // Resetear a lunes
         setProgreso((prev) => [...prev, '🎉 Plan listo para visualizar']);
-        
+
         console.log('✅ Plan generado y cargado:', data);
       }
 
@@ -254,7 +254,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     try {
       // Usar el servicio de API que maneja automáticamente la autenticación
       const blob = await descargarPlanPdf(ninId, menId);
-      
+
       // Crear URL temporal y descargar
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -602,8 +602,8 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
               <Button
                 onClick={descargarPlanPdfHandler}
                 disabled={descargandoPdf}
-                style={{ 
-                  backgroundColor: '#2563eb', 
+                style={{
+                  backgroundColor: '#2563eb',
                   color: 'white',
                   borderColor: '#2563eb'
                 }}
@@ -618,8 +618,8 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
               </Button>
               <Button
                 onClick={handleGenerarNuevo}
-                style={{ 
-                  backgroundColor: '#16a34a', 
+                style={{
+                  backgroundColor: '#16a34a',
                   color: 'white',
                   borderColor: '#16a34a'
                 }}
