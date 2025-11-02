@@ -2,7 +2,6 @@
 // Este archivo fuerza las URLs de US-EAST1
 
 export const config = {
-  // URLs de producción en US-EAST1
   API_BASE_URL: 'https://backend.tecno-express.shop',
   ML_API_BASE_URL: 'https://modelo.tecno-express.shop',
   API_VERSION: 'v1',

@@ -40,47 +40,63 @@ export const MealPlanPage: React.FC = () => {
       }
       const data = response.data || [];
 
-      // Enriquecer con información de preferencias y perfil
-      const ninosEnriquecidos = await Promise.all(
-        data.map(async (item: any) => {
-          // La estructura es { nino: {...}, antropometrias: [...] }
-          const ninoData = item.nino || item;
+      // OPTIMIZACIÓN: Cargar datos básicos primero, detalles después (lazy loading)
+      const ninosBasicos = data.map((item: any) => {
+        const ninoData = item.nino || item;
+        return {
+          ...ninoData,
+          edad_anos: Math.floor(
+            (new Date().getTime() - new Date(ninoData.nin_fecha_nac).getTime()) /
+            (1000 * 60 * 60 * 24 * 365)
+          ),
+          tiene_preferencias: false, // Se carga después
+          total_preferencias: 0,
+          tiene_perfil: false, // Se carga después
+          ultima_evaluacion: item.antropometrias?.[0]?.ant_fecha || null,
+          clasificacion: item.antropometrias?.[0]?.clasificacion || null,
+        };
+      });
+
+      setNinos(ninosBasicos);
+
+      // Cargar detalles en background (sin bloquear UI)
+      Promise.all(
+        ninosBasicos.map(async (nino, index) => {
           let tienePreferencias = false;
           let totalPreferencias = 0;
           let tienePerfil = false;
 
           try {
-            const prefs = await obtenerPreferencias(ninoData.nin_id, true);
+            const prefs = await obtenerPreferencias(nino.nin_id, true);
             const total = Object.values(prefs.preferencias).flat().length;
             tienePreferencias = total > 0;
             totalPreferencias = total;
           } catch (error: any) {
-            // No tiene preferencias configuradas (esperado para niños nuevos)
+            // No tiene preferencias
           }
 
           try {
-            await obtenerPerfilNutricional(ninoData.nin_id, true);
+            await obtenerPerfilNutricional(nino.nin_id, true);
             tienePerfil = true;
           } catch (error: any) {
-            // No tiene perfil calculado (esperado para niños nuevos)
+            // No tiene perfil
           }
 
-          return {
-            ...ninoData,
-            edad_anos: Math.floor(
-              (new Date().getTime() - new Date(ninoData.nin_fecha_nac).getTime()) /
-              (1000 * 60 * 60 * 24 * 365)
-            ),
-            tiene_preferencias: tienePreferencias,
-            total_preferencias: totalPreferencias,
-            tiene_perfil: tienePerfil,
-            ultima_evaluacion: item.antropometrias?.[0]?.ant_fecha || null,
-            clasificacion: item.antropometrias?.[0]?.clasificacion || null,
-          };
+          // Actualizar solo este niño en el estado
+          setNinos(prev => {
+            const nuevos = [...prev];
+            nuevos[index] = {
+              ...nuevos[index],
+              tiene_preferencias: tienePreferencias,
+              total_preferencias: totalPreferencias,
+              tiene_perfil: tienePerfil,
+            };
+            return nuevos;
+          });
         })
-      );
-
-      setNinos(ninosEnriquecidos);
+      ).catch(error => {
+        console.error('Error cargando detalles:', error);
+      });
     } catch (error) {
       toast({
         title: 'Error',
