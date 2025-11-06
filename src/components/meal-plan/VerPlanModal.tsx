@@ -59,15 +59,14 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     if (open && menId) {
       cargarPlan();
       setPlanGenerado(false);
-      setDiaSeleccionado(0); // Reset día seleccionado al abrir
+      setDiaSeleccionado(0);
     }
-  }, [open, menId, ninId]); // Agregar ninId como dependencia
+  }, [open, menId, ninId]);
 
-  // Resetear estado cuando cambia el niño
   useEffect(() => {
     if (open) {
-      setPlan(null); // Limpiar plan anterior
-      setDiaSeleccionado(0); // Resetear día
+      setPlan(null);
+      setDiaSeleccionado(0);
     }
   }, [ninId, open]);
 
@@ -129,11 +128,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     }
   };
 
-  // Helper para convertir score ML a porcentaje y color
-  // El score representa el ranking relativo de la recomendación (0-1)
-  // Interpretación: Score más alto = Mejor match con perfil nutricional del niño
   const getScoreInfo = (score: number) => {
-    // Ajustar escala: Mapear [0,1] a [50,100] para reflejar confianza base del modelo (85% accuracy)
     const adjustedScore = 50 + (score * 50);
     const percentage = Math.round(adjustedScore);
     let color = 'text-gray-600';
@@ -170,7 +165,6 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     setProgreso([]);
 
     try {
-      // Empezar el plan desde HOY en lugar del próximo lunes
       const hoy = new Date();
       const fechaInicio = hoy.toISOString().split('T')[0];
 
@@ -189,12 +183,10 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
 
       setProgreso((prev) => [...prev, '✅ Plan generado exitosamente']);
 
-      // Recargar el plan inmediatamente
       if (resultado.men_id) {
         setProgreso((prev) => [...prev, '📥 Cargando plan generado...']);
         const data = await obtenerDetalleMenu(resultado.men_id);
 
-        // Transformar datos igual que en cargarPlan
         if (data.dias && Array.isArray(data.dias)) {
           data.dias = data.dias.map((dia: any) => {
             const transformed: any = {
@@ -237,7 +229,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
 
         setPlan(data);
         setPlanGenerado(true);
-        setDiaSeleccionado(0); // Resetear a lunes
+        setDiaSeleccionado(0);
         setProgreso((prev) => [...prev, '🎉 Plan listo para visualizar']);
 
         console.log('✅ Plan generado y cargado:', data);
@@ -284,22 +276,36 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
   };
 
   const descargarPlanPdfHandler = async () => {
-    if (!menId || !plan) return;
+    console.log('🔍 Iniciando descarga PDF...', { ninId, menId, plan });
+
+    if (!menId || !plan) {
+      console.warn('⚠️ No hay menId o plan disponible');
+      toast({
+        title: 'Error',
+        description: 'No hay plan disponible para descargar',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setDescargandoPdf(true);
-    try {
-      // Usar el servicio de API que maneja automáticamente la autenticación
-      const blob = await descargarPlanPdf(ninId, menId);
+    console.log('⏳ Estado descargandoPdf establecido a true');
 
-      // Crear URL temporal y descargar
+    try {
+      console.log('📡 Llamando a descargarPlanPdf...', { ninId, menId });
+      const blob = await descargarPlanPdf(ninId, menId);
+      console.log('✅ Blob recibido:', { size: blob.size, type: blob.type });
+
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = `plan_comidas_${ninNombre.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       document.body.appendChild(link);
+      console.log('🔗 Link creado, iniciando click...');
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
+      console.log('✅ Descarga completada exitosamente');
 
       toast({
         title: '✅ PDF descargado',
@@ -307,12 +313,14 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
       });
     } catch (error: any) {
       console.error('❌ Error descargando PDF:', error);
+      console.error('❌ Stack:', error?.stack);
       toast({
-        title: 'Error',
-        description: error.message || 'No se pudo descargar el PDF',
+        title: 'Error al descargar PDF',
+        description: error.message || 'No se pudo descargar el PDF. Verifica la consola para más detalles.',
         variant: 'destructive',
       });
     } finally {
+      console.log('🔄 Restableciendo estado descargandoPdf a false');
       setDescargandoPdf(false);
     }
   };
