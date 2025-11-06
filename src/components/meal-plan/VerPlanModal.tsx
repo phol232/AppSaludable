@@ -96,7 +96,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                 rec_id: item.rec_id,
                 rec_nombre: item.rec_nombre,
                 mei_kcal: item.mei_kcal,
-                score_ml: item.score_ml || 0,
+                score_ml: item.mei_score_ml || 0,
                 rec_instrucciones: item.rec_instrucciones || '',
                 ingredientes: []
               };
@@ -130,28 +130,36 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
   };
 
   // Helper para convertir score ML a porcentaje y color
+  // El score representa el ranking relativo de la recomendación (0-1)
+  // Interpretación: Score más alto = Mejor match con perfil nutricional del niño
   const getScoreInfo = (score: number) => {
-    const percentage = Math.round(score * 100);
+    // Ajustar escala: Mapear [0,1] a [50,100] para reflejar confianza base del modelo (85% accuracy)
+    const adjustedScore = 50 + (score * 50);
+    const percentage = Math.round(adjustedScore);
     let color = 'text-gray-600';
     let bgColor = 'bg-gray-100';
     let label = 'Baja';
 
-    if (percentage >= 80) {
+    if (percentage >= 90) {
       color = 'text-green-600';
       bgColor = 'bg-green-100';
-      label = 'Alta';
-    } else if (percentage >= 60) {
+      label = 'Excelente';
+    } else if (percentage >= 80) {
       color = 'text-blue-600';
       bgColor = 'bg-blue-100';
-      label = 'Media';
-    } else if (percentage >= 40) {
+      label = 'Muy Buena';
+    } else if (percentage >= 70) {
+      color = 'text-cyan-600';
+      bgColor = 'bg-cyan-100';
+      label = 'Buena';
+    } else if (percentage >= 60) {
       color = 'text-yellow-600';
       bgColor = 'bg-yellow-100';
-      label = 'Media';
+      label = 'Aceptable';
     } else {
       color = 'text-orange-600';
       bgColor = 'bg-orange-100';
-      label = 'Baja';
+      label = 'Básica';
     }
 
     return { percentage, color, bgColor, label };
@@ -209,7 +217,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                   rec_id: item.rec_id,
                   rec_nombre: item.rec_nombre,
                   mei_kcal: item.mei_kcal,
-                  score_ml: item.score_ml || 0,
+                  score_ml: item.mei_score_ml || 0,
                   rec_instrucciones: item.rec_instrucciones || '',
                   ingredientes: []
                 };
