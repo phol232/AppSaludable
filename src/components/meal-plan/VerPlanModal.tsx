@@ -276,10 +276,13 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
   };
 
   const descargarPlanPdfHandler = async () => {
-    console.log('🔍 Iniciando descarga PDF...', { ninId, menId, plan });
+    // Usar plan.men_id si está disponible, sino menId de props
+    const idMenu = plan?.men_id || menId;
+    
+    console.log('🔍 Iniciando descarga PDF...', { ninId, menId, planMenId: plan?.men_id, idMenu, plan });
 
-    if (!menId || !plan) {
-      console.warn('⚠️ No hay menId o plan disponible');
+    if (!idMenu || !plan) {
+      console.warn('⚠️ No hay menId o plan disponible', { idMenu, plan });
       toast({
         title: 'Error',
         description: 'No hay plan disponible para descargar',
@@ -292,8 +295,8 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     console.log('⏳ Estado descargandoPdf establecido a true');
 
     try {
-      console.log('📡 Llamando a descargarPlanPdf...', { ninId, menId });
-      const blob = await descargarPlanPdf(ninId, menId);
+      console.log('📡 Llamando a descargarPlanPdf...', { ninId, idMenu });
+      const blob = await descargarPlanPdf(ninId, idMenu);
       console.log('✅ Blob recibido:', { size: blob.size, type: blob.type });
 
       const downloadUrl = window.URL.createObjectURL(blob);
