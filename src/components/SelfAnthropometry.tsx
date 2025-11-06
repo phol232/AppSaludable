@@ -184,7 +184,7 @@ export default function SelfAnthropometry() {
     const timeoutId = setTimeout(() => {
       fetchChildDetail(selectedChildId);
     }, 0); // Defer para siguiente tick
-    
+
     return () => clearTimeout(timeoutId);
   }, [selectedChildId, fetchChildDetail]);
 

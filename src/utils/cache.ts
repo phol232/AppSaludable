@@ -22,7 +22,7 @@ class SimpleCache {
 
   get<T>(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
       return null;
     }
@@ -39,13 +39,13 @@ class SimpleCache {
   has(key: string): boolean {
     const entry = this.cache.get(key);
     if (!entry) return false;
-    
+
     // Verificar si expiró
     if (Date.now() - entry.timestamp > this.ttl) {
       this.cache.delete(key);
       return false;
     }
-    
+
     return true;
   }
 

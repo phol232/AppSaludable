@@ -38,7 +38,7 @@ export const MealPlanPage: React.FC = () => {
       // OPTIMIZACIÓN: Verificar caché primero
       const cacheKey = 'ninos-list';
       const cached = apiCache.get<NinoConPreferencias[]>(cacheKey);
-      
+
       if (cached) {
         setNinos(cached);
         setLoading(false);
@@ -76,7 +76,7 @@ export const MealPlanPage: React.FC = () => {
         // Verificar caché individual
         const prefKey = `preferencias-${nino.nin_id}`;
         const perfilKey = `perfil-${nino.nin_id}`;
-        
+
         let tienePreferencias = false;
         let totalPreferencias = 0;
         let tienePerfil = false;
@@ -183,7 +183,7 @@ export const MealPlanPage: React.FC = () => {
     setModalComidas(false);
     setModalGenerarPlan(false);
     setNinoSeleccionado(null);
-    
+
     // OPTIMIZACIÓN: Invalidar caché cuando hay cambios
     if (recargar) {
       // Invalidar caché del niño específico y lista general

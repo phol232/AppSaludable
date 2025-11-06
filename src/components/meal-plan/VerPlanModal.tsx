@@ -27,6 +27,7 @@ interface Comida {
   rec_id: number;
   rec_nombre: string;
   mei_kcal: number;
+  score_ml?: number;
   ingredientes?: any[];
 }
 
@@ -95,6 +96,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                 rec_id: item.rec_id,
                 rec_nombre: item.rec_nombre,
                 mei_kcal: item.mei_kcal,
+                score_ml: item.score_ml || 0,
                 rec_instrucciones: item.rec_instrucciones || '',
                 ingredientes: []
               };
@@ -125,6 +127,34 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     } finally {
       setCargando(false);
     }
+  };
+
+  // Helper para convertir score ML a porcentaje y color
+  const getScoreInfo = (score: number) => {
+    const percentage = Math.round(score * 100);
+    let color = 'text-gray-600';
+    let bgColor = 'bg-gray-100';
+    let label = 'Baja';
+
+    if (percentage >= 80) {
+      color = 'text-green-600';
+      bgColor = 'bg-green-100';
+      label = 'Alta';
+    } else if (percentage >= 60) {
+      color = 'text-blue-600';
+      bgColor = 'bg-blue-100';
+      label = 'Media';
+    } else if (percentage >= 40) {
+      color = 'text-yellow-600';
+      bgColor = 'bg-yellow-100';
+      label = 'Media';
+    } else {
+      color = 'text-orange-600';
+      bgColor = 'bg-orange-100';
+      label = 'Baja';
+    }
+
+    return { percentage, color, bgColor, label };
   };
 
   const handleGenerarNuevo = async () => {
@@ -179,6 +209,7 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                   rec_id: item.rec_id,
                   rec_nombre: item.rec_nombre,
                   mei_kcal: item.mei_kcal,
+                  score_ml: item.score_ml || 0,
                   rec_instrucciones: item.rec_instrucciones || '',
                   ingredientes: []
                 };
@@ -465,6 +496,14 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                               <span className="text-orange-600 font-bold text-xl">{diaActual.desayuno.mei_kcal}</span>
                               <span className="text-gray-600 text-xs">kcal</span>
                             </div>
+                            {diaActual.desayuno.score_ml !== undefined && diaActual.desayuno.score_ml > 0 && (
+                              <div className={`${getScoreInfo(diaActual.desayuno.score_ml).bgColor} rounded px-2 py-1 mb-2 flex items-center justify-between`}>
+                                <span className="text-xs font-medium text-gray-600">🤖 IA</span>
+                                <span className={`text-xs font-bold ${getScoreInfo(diaActual.desayuno.score_ml).color}`}>
+                                  {getScoreInfo(diaActual.desayuno.score_ml).percentage}%
+                                </span>
+                              </div>
+                            )}
                             <Button
                               size="sm"
                               onClick={() => cargarDetalleReceta(diaActual.desayuno!)}
@@ -496,6 +535,14 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                               <span className="text-orange-600 font-bold text-xl">{diaActual.almuerzo.mei_kcal}</span>
                               <span className="text-gray-600 text-xs">kcal</span>
                             </div>
+                            {diaActual.almuerzo.score_ml !== undefined && diaActual.almuerzo.score_ml > 0 && (
+                              <div className={`${getScoreInfo(diaActual.almuerzo.score_ml).bgColor} rounded px-2 py-1 mb-2 flex items-center justify-between`}>
+                                <span className="text-xs font-medium text-gray-600">🤖 IA</span>
+                                <span className={`text-xs font-bold ${getScoreInfo(diaActual.almuerzo.score_ml).color}`}>
+                                  {getScoreInfo(diaActual.almuerzo.score_ml).percentage}%
+                                </span>
+                              </div>
+                            )}
                             <Button
                               size="sm"
                               onClick={() => cargarDetalleReceta(diaActual.almuerzo!)}
@@ -527,6 +574,14 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
                               <span className="text-orange-600 font-bold text-xl">{diaActual.cena.mei_kcal}</span>
                               <span className="text-gray-600 text-xs">kcal</span>
                             </div>
+                            {diaActual.cena.score_ml !== undefined && diaActual.cena.score_ml > 0 && (
+                              <div className={`${getScoreInfo(diaActual.cena.score_ml).bgColor} rounded px-2 py-1 mb-2 flex items-center justify-between`}>
+                                <span className="text-xs font-medium text-gray-600">🤖 IA</span>
+                                <span className={`text-xs font-bold ${getScoreInfo(diaActual.cena.score_ml).color}`}>
+                                  {getScoreInfo(diaActual.cena.score_ml).percentage}%
+                                </span>
+                              </div>
+                            )}
                             <Button
                               size="sm"
                               onClick={() => cargarDetalleReceta(diaActual.cena!)}
