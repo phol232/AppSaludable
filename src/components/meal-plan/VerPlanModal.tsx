@@ -170,12 +170,9 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     setProgreso([]);
 
     try {
+      // Empezar el plan desde HOY en lugar del próximo lunes
       const hoy = new Date();
-      const diaSemana = hoy.getDay();
-      const diasHastaLunes = diaSemana === 0 ? 1 : diaSemana === 1 ? 0 : 8 - diaSemana;
-      const proximoLunes = new Date(hoy);
-      proximoLunes.setDate(hoy.getDate() + diasHastaLunes);
-      const fechaInicio = proximoLunes.toISOString().split('T')[0];
+      const fechaInicio = hoy.toISOString().split('T')[0];
 
       setProgreso((prev) => [...prev, '🔍 Obteniendo perfil nutricional...']);
       await new Promise((resolve) => setTimeout(resolve, 500));
