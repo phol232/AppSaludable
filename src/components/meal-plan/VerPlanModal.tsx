@@ -276,9 +276,8 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
   };
 
   const descargarPlanPdfHandler = async () => {
-    // Usar plan.men_id si está disponible, sino menId de props
     const idMenu = plan?.men_id || menId;
-    
+
     console.log('🔍 Iniciando descarga PDF...', { ninId, menId, planMenId: plan?.men_id, idMenu, plan });
 
     if (!idMenu || !plan) {
@@ -395,7 +394,6 @@ export const VerPlanModal: React.FC<VerPlanModalProps> = ({
     );
   };
 
-  // Debug: ver qué datos llegan
   useEffect(() => {
     if (plan) {
       console.log('📊 Plan cargado:', plan);
