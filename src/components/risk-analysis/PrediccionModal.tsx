@@ -100,7 +100,7 @@ export function PrediccionModal({ open, onClose, child }: PrediccionModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" style={{ maxWidth: '90vw', width: '1200px' }}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" style={{ maxWidth: '70vw', width: '850px' }}>
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span className="flex items-center space-x-2">
