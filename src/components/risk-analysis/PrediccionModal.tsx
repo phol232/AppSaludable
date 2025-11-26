@@ -191,8 +191,8 @@ export function PrediccionModal({ open, onClose, child }: PrediccionModalProps) 
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">Clasificación Predicha</p>
                     <Badge className={`${getClasificacionColor(prediccion.clasificacion)} text-white text-lg px-4 py-2`}>
-                      {prediccion.clasificacion && typeof prediccion.clasificacion === 'string' 
-                        ? prediccion.clasificacion.replace(/_/g, ' ').toUpperCase() 
+                      {prediccion.clasificacion && typeof prediccion.clasificacion === 'string'
+                        ? prediccion.clasificacion.replace(/_/g, ' ').toUpperCase()
                         : 'N/A'}
                     </Badge>
                   </div>
