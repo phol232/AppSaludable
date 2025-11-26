@@ -230,6 +230,16 @@ export function RiskAnalysisScreen() {
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => handleOpenPerfil(child)}
+                    className="w-full justify-start"
+                  >
+                    <User size={16} className="mr-2" />
+                    Perfil
+                  </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => handleOpenAdherencia(child)}
                     className="w-full justify-start"
                   >
@@ -255,16 +265,6 @@ export function RiskAnalysisScreen() {
                   >
                     <TrendingUp size={16} className="mr-2" />
                     Predicción
-                  </Button>
-                  
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleOpenPerfil(child)}
-                    className="w-full justify-start"
-                  >
-                    <User size={16} className="mr-2" />
-                    Perfil
                   </Button>
                 </div>
               </div>
