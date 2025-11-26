@@ -27,10 +27,13 @@ type Dificultad = 'NINGUNA' | 'BAJA' | 'MEDIA' | 'ALTA';
 
 interface AdherenciaHistorial {
   adh_id: number;
-  adh_registrado_en: string;
-  adh_estado: string;
-  adh_porcentaje: number;
-  adh_dificultad: string;
+  fecha: string;
+  estado: string;
+  porcentaje: number;
+  dificultad: string;
+  comentario?: string;
+  men_inicio?: string;
+  men_fin?: string;
 }
 
 export function AdherenciaModal({ open, onClose, child }: AdherenciaModalProps) {
@@ -84,14 +87,14 @@ export function AdherenciaModal({ open, onClose, child }: AdherenciaModalProps) 
       }
 
       toast.success('Adherencia registrada exitosamente');
-      
+
       // Reset form
       setFecha(new Date().toISOString().split('T')[0]);
       setEstado('OK');
       setPorcentaje([75]);
       setDificultad('NINGUNA');
       setComentario('');
-      
+
       // Recargar historial si está visible
       if (mostrarHistorial) {
         cargarHistorial();
@@ -148,14 +151,26 @@ export function AdherenciaModal({ open, onClose, child }: AdherenciaModalProps) 
               ) : (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {historial.slice(0, 10).map((reg) => (
-                    <div key={reg.adh_id} className="flex items-center justify-between p-2 bg-background rounded border text-sm">
+                    <div 
+                      key={reg.adh_id} 
+                      className="flex items-center justify-between p-3 bg-background rounded border text-sm hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => {
+                        // Cargar datos en el formulario
+                        setFecha(reg.fecha.split('T')[0]);
+                        setEstado(reg.estado as Estado);
+                        setPorcentaje([reg.porcentaje]);
+                        setDificultad(reg.dificultad as Dificultad);
+                        setComentario(reg.comentario || '');
+                        setMostrarHistorial(false);
+                      }}
+                    >
                       <div className="flex items-center space-x-2">
-                        {getEstadoIcon(reg.adh_estado)}
-                        <span>{new Date(reg.adh_registrado_en).toLocaleDateString()}</span>
+                        {getEstadoIcon(reg.estado)}
+                        <span>{new Date(reg.fecha).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <span className="font-medium">{reg.adh_porcentaje}%</span>
-                        <Badge variant="outline" className="text-xs">{reg.adh_dificultad}</Badge>
+                        <span className="font-medium">{reg.porcentaje}%</span>
+                        <Badge variant="outline" className="text-xs">{reg.dificultad}</Badge>
                       </div>
                     </div>
                   ))}

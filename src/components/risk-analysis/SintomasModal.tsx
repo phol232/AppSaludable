@@ -27,11 +27,12 @@ type Severidad = 'LEVE' | 'MODERADO' | 'SEVERO';
 
 interface SintomaHistorial {
   sin_id: number;
-  sin_fecha: string;
-  sin_tipo: string;
-  sin_severidad: string;
-  sin_duracion_dias: number;
-  sin_relacionado_menu: boolean;
+  fecha: string;
+  tipo: string;
+  severidad: string;
+  duracion_dias: number;
+  relacionado_menu: boolean;
+  notas?: string;
 }
 
 export function SintomasModal({ open, onClose, child }: SintomasModalProps) {
@@ -111,7 +112,7 @@ export function SintomasModal({ open, onClose, child }: SintomasModalProps) {
       setDuracionDias(1);
       setRelacionadoMenu(false);
       setNotas('');
-      
+
       // Recargar historial si está visible
       if (mostrarHistorial) {
         cargarHistorial();
@@ -168,17 +169,30 @@ export function SintomasModal({ open, onClose, child }: SintomasModalProps) {
               ) : (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {historial.slice(0, 10).map((sin) => (
-                    <div key={sin.sin_id} className="flex items-center justify-between p-2 bg-background rounded border text-sm">
+                    <div 
+                      key={sin.sin_id} 
+                      className="flex items-center justify-between p-3 bg-background rounded border text-sm hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => {
+                        // Cargar datos en el formulario
+                        setFecha(sin.fecha);
+                        setTipo(sin.tipo);
+                        setSeveridad(sin.severidad as Severidad);
+                        setDuracionDias(sin.duracion_dias);
+                        setRelacionadoMenu(sin.relacionado_menu);
+                        setNotas(sin.notas || '');
+                        setMostrarHistorial(false);
+                      }}
+                    >
                       <div className="flex items-center space-x-2">
                         <AlertTriangle size={14} className="text-orange-500" />
-                        <span>{new Date(sin.sin_fecha).toLocaleDateString()}</span>
-                        <span className="font-medium">{sin.sin_tipo}</span>
+                        <span>{new Date(sin.fecha).toLocaleDateString()}</span>
+                        <span className="font-medium">{sin.tipo}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge className={getSeveridadColor(sin.sin_severidad)}>
-                          {sin.sin_severidad}
+                        <Badge className={getSeveridadColor(sin.severidad)}>
+                          {sin.severidad}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">{sin.sin_duracion_dias}d</span>
+                        <span className="text-xs text-muted-foreground">{sin.duracion_dias}d</span>
                       </div>
                     </div>
                   ))}
