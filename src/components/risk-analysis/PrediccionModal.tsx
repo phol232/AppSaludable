@@ -41,7 +41,7 @@ export function PrediccionModal({ open, onClose, child }: PrediccionModalProps) 
   const handleGenerarPrediccion = async () => {
     try {
       setLoading(true);
-      
+
       const response = await apiService.generarPrediccion(child.nin_id, mesesProyeccion);
 
       if (!response.success || !response.data) {
@@ -50,7 +50,7 @@ export function PrediccionModal({ open, onClose, child }: PrediccionModalProps) 
 
       setPrediccion(response.data);
       toast.success('Predicción generada exitosamente');
-      
+
     } catch (error: any) {
       console.error('Error generando predicción:', error);
       toast.error(error.response?.data?.detail || 'Error al generar predicción');

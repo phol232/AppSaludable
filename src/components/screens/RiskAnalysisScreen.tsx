@@ -35,7 +35,7 @@ export function RiskAnalysisScreen() {
   const [filteredChildren, setFilteredChildren] = useState<Child[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  
+
   // Estados de modales
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [adherenciaModalOpen, setAdherenciaModalOpen] = useState(false);
@@ -65,10 +65,10 @@ export function RiskAnalysisScreen() {
       if (response.success && response.data) {
         const childrenData = response.data.map(item => {
           const nino = item.nino;
-          const edad = nino.nin_fecha_nac 
+          const edad = nino.nin_fecha_nac
             ? Math.floor((new Date().getTime() - new Date(nino.nin_fecha_nac).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
             : 0;
-          
+
           return {
             nin_id: nino.nin_id,
             nin_nombres: nino.nin_nombres,
@@ -100,7 +100,7 @@ export function RiskAnalysisScreen() {
 
   const getClasificacionColor = (clasificacion?: string) => {
     if (!clasificacion) return 'bg-gray-500';
-    
+
     const lower = clasificacion.toLowerCase();
     if (lower.includes('severa') || lower.includes('obesidad')) return 'bg-red-500';
     if (lower.includes('moderada') || lower.includes('sobrepeso')) return 'bg-orange-500';
@@ -236,7 +236,7 @@ export function RiskAnalysisScreen() {
                     <User size={16} className="mr-2" />
                     Perfil
                   </Button>
-                  
+
                   <Button
                     size="sm"
                     variant="outline"
@@ -246,7 +246,7 @@ export function RiskAnalysisScreen() {
                     <Activity size={16} className="mr-2" />
                     Adherencia
                   </Button>
-                  
+
                   <Button
                     size="sm"
                     variant="outline"
@@ -256,7 +256,7 @@ export function RiskAnalysisScreen() {
                     <Heart size={16} className="mr-2" />
                     Síntomas
                   </Button>
-                  
+
                   <Button
                     size="sm"
                     variant="outline"
@@ -292,19 +292,19 @@ export function RiskAnalysisScreen() {
             onClose={() => setAdherenciaModalOpen(false)}
             child={selectedChild}
           />
-          
+
           <SintomasModal
             open={sintomasModalOpen}
             onClose={() => setSintomasModalOpen(false)}
             child={selectedChild}
           />
-          
+
           <PrediccionModal
             open={prediccionModalOpen}
             onClose={() => setPrediccionModalOpen(false)}
             child={selectedChild}
           />
-          
+
           <PerfilNutricionalModal
             open={perfilModalOpen}
             onClose={() => setPerfilModalOpen(false)}
